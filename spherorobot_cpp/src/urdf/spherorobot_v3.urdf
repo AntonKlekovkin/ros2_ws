@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="spherorobot_v3">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="0.0053264913198503 -7.93904876906101E-05 0.0361772739745209"
+        rpy="0 0 0" />
+      <mass
+        value="0.65221560831725" />
+      <inertia
+        ixx="0.000252248531594249"
+        ixy="-1.88249807868208E-13"
+        ixz="9.9256788474027E-10"
+        iyy="0.000124005291872883"
+        iyz="7.91604928813145E-15"
+        izz="0.000335436442658168" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="$(find spherorobot_cpp)/src/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="red">
+        <color
+          rgba="1 0 0 1" />
+          </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="$(find spherorobot_cpp)/src/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="base_link">
+    <material>Gazebo/Red</material>
+  </gazebo>
+  <link
+    name="shaft_link">
+    <inertial>
+      <origin
+        xyz="1.5532065499345E-06 1.98926112364674E-05 0.0609999999998285"
+        rpy="0 0 0" />
+      <mass
+        value="0.0492681358348241" />
+      <inertia
+        ixx="2.8352638237082E-05"
+        ixy="5.51817931714308E-19"
+        ixz="-2.25613836136128E-17"
+        iyy="8.1075309609307E-07"
+        iyz="-2.67092967899662E-20"
+        izz="2.83524343568824E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="$(find spherorobot_cpp)/src/meshes/shaft_link.STL" />
+      </geometry>
+      <material
+        name="black">
+        <color
+          rgba="0 0 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="$(find spherorobot_cpp)/src/meshes/shaft_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+   <gazebo reference="shaft_link">
+    <material>Gazebo/Black</material>
+  </gazebo>
+  <joint
+    name="shaft_joint"
+    type="continuous">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="shaft_link" />
+    <axis
+      xyz="0 1 0" />
+      <!-- <limit effort="100" velocity="5"/>
+      <dynamics damping="2.0" friction="1.0"/> -->
+  </joint>
+  <link
+    name="sphere_link">
+    <inertial>
+      <origin
+        xyz="-4.58463953834005E-10 -5.42680273638821E-11 0.0609841009840273"
+        rpy="0 0 0" />
+      <mass
+        value="0.522951816904046" />
+      <inertia
+        ixx="0.000755256607769424"
+        ixy="-3.48454237988201E-12"
+        ixz="4.768428192771E-13"
+        iyy="0.0012083226133878"
+        iyz="3.29672630947285E-13"
+        izz="0.000754970828774233" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="$(find spherorobot_cpp)/src/meshes/sphere_link.STL" />
+      </geometry>
+      <material
+        name="white_transparent">
+        <color
+          rgba="1 1 1 0.3" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="$(find spherorobot_cpp)/src/meshes/sphere_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="sphere_link">
+    <material>Gazebo/Transparent</material>
+  </gazebo>
+  <joint
+    name="sphere_joint"
+    type="continuous">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="shaft_link" />
+    <child
+      link="sphere_link" />
+    <axis
+      xyz="0 1 0" />
+    <!-- <limit lower="-3.14" upper="3.14" effort="100" velocity="5"/> 
+    <dynamics friction="1.5" damping="0.2"/>   -->
+  </joint>
+  <gazebo>
+    <plugin name="pendulum_drive" filename="libpendulum_drive_plugin.so">
+      <ros><namespace>/</namespace></ros>
+    </plugin>
+  </gazebo>
+</robot>

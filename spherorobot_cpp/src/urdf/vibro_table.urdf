@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<robot name="vibro_table">
+    <material name="steel">
+        <color rgba="0.6 0.6 0.6 1.0"/>
+    </material>
+
+    <link name="base_link"/>
+
+    <link name="left_rail">
+        <visual>
+        <geometry>
+            <box size="5.0 0.05 0.05"/> <!-- Длина, ширина, высота -->
+        </geometry>
+        <material name="steel"/>
+        </visual>
+        <collision>
+        <geometry>
+            <box size="5.0 0.05 0.05"/>
+        </geometry>
+        </collision>
+        <inertial>
+        <mass value="1.0"/>
+        <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="1.0"/>
+        </inertial>
+    </link>
+
+    <link name="right_rail">
+        <visual>
+        <geometry>
+            <box size="5.0 0.05 0.05"/>
+        </geometry>
+        <material name="steel"/>
+        </visual>
+        <collision>
+        <geometry>
+            <box size="5.0 0.05 0.05"/>
+        </geometry>
+        </collision>
+        <inertial>
+        <mass value="1.0"/>
+        <inertia ixx="1.0" ixy="0" ixz="0" iyy="1.0" iyz="0" izz="1.0"/>
+        </inertial>
+    </link>
+
+        <!-- Соединение левой рельсы с базой -->
+    <joint name="left_rail_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="left_rail"/>
+        <origin xyz="0 0.045 0.001" rpy="0 0 0"/> <!-- Позиция относительно центра -->
+    </joint>
+
+    <!-- Соединение правой рельсы с базой -->
+    <joint name="right_rail_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="right_rail"/>
+        <origin xyz="0 -0.045 0.001" rpy="0 0 0"/> <!-- Параллельно левой рельсе -->
+    </joint>
+    <gazebo>
+  <plugin name="move_planar" filename="libgazebo_ros_planar_move.so">
+    <command_topic>/cmd_vel</command_topic>
+    <odometry_topic>/odom</odometry_topic>
+    <odometry_frame>odom</odometry_frame>
+    <robot_base_frame>base_link</robot_base_frame>
+    <publish_odometry>true</publish_odometry>
+    <publish_odometry_tf>true</publish_odometry_tf>
+    <xy_velocity_max>1.0</xy_velocity_max>
+    <yaw_velocity_max>1.0</yaw_velocity_max>
+    <static>false</static> <!-- Для подвижных объектов -->
+  </plugin>
+</gazebo>
+</robot>
