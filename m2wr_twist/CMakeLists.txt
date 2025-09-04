@@ -40,3 +40,7 @@ install(TARGETS parse_lidar DESTINATION lib/${PROJECT_NAME})
 add_executable(get_odom src/get_odom.cpp)
 ament_target_dependencies(get_odom rclcpp nav_msgs tf2 tf2_geometry_msgs)
 install(TARGETS get_odom DESTINATION lib/${PROJECT_NAME})
+
+add_executable(tr_without_fb src/tr_without_fb.cpp)
+ament_target_dependencies(tr_without_fb rclcpp nav_msgs tf2 tf2_geometry_msgs)
+install(TARGETS tr_without_fb DESTINATION lib/${PROJECT_NAME})
