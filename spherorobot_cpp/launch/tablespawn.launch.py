@@ -17,10 +17,10 @@ def generate_launch_description():
         executable='spawn_entity.py',
         arguments=[
             '-entity', 'rails_system',
-            '-file', os.path.join(get_package_share_directory('spherorobot_cpp'),'src','urdf','vibro_table.urdf'),
+            '-file', os.path.join(get_package_share_directory('spherorobot_cpp'),'urdf','vibro_table.urdf'),
             '-x', '0.5',
             '-y', '0.0',
-            '-z', '0.1'
+            '-z', '0.01'
         ],
         output='screen',
         parameters=[{

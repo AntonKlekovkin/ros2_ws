@@ -18,7 +18,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="$(find spherorobot_cpp)/src/meshes/base_link.STL" />        
+        <mesh filename="$(find spherorobot_cpp)/meshes/base_link.STL" />        
       </geometry>
       <material name="red">
         <color rgba="1 0 0 1" />
@@ -27,7 +27,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="$(find spherorobot_cpp)/src/meshes/base_link.STL" />
+        <mesh filename="$(find spherorobot_cpp)/meshes/base_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -52,7 +52,7 @@
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="$(find spherorobot_cpp)/src/meshes/shaft_link.STL" />
+          filename="$(find spherorobot_cpp)/meshes/shaft_link.STL" />
       </geometry>
       <material name="black">
         <color rgba="0 0 0 1" />
@@ -61,7 +61,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="$(find spherorobot_cpp)/src/meshes/shaft_link.STL" />
+        <mesh filename="$(find spherorobot_cpp)/meshes/shaft_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -93,7 +93,7 @@
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="$(find spherorobot_cpp)/src/meshes/sphere_link.STL" />
+        <mesh filename="$(find spherorobot_cpp)/meshes/sphere_link.STL" />
         <!--sphere radius="0.06"/-->
       </geometry>
       <material name="glass">
@@ -103,7 +103,7 @@
     <collision>
       <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <!-- mesh filename="$(find spherorobot_cpp)/src/meshes/sphere_link.STL" /-->
+        <!-- mesh filename="$(find spherorobot_cpp)/meshes/sphere_link.STL" /-->
         <sphere radius="0.06"/>
       </geometry>
     </collision>    

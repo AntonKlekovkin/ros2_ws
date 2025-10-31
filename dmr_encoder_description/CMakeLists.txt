@@ -10,7 +10,6 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(xacro REQUIRED)
 find_package(robot_state_publisher REQUIRED)
-find_package(joint_state_publisher REQUIRED)
 find_package(rviz2 REQUIRED)
 
 if(BUILD_TESTING)
@@ -27,4 +26,4 @@ endif()
 
 ament_package()
 
-install(DIRECTORY launch urdf config DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch urdf DESTINATION share/${PROJECT_NAME})

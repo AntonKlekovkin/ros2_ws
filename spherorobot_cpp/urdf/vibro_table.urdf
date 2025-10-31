@@ -57,8 +57,12 @@
     </joint>
     <gazebo>
   <plugin name="move_planar" filename="libgazebo_ros_planar_move.so">
-    <command_topic>/cmd_vel</command_topic>
-    <odometry_topic>/odom</odometry_topic>
+    <ros>
+        <!-- Remap the default topic -->
+        <remapping>cmd_vel:=platform_vel</remapping>
+        <remapping>odom:=platform_odom</remapping>
+    </ros>
+    
     <odometry_frame>odom</odometry_frame>
     <robot_base_frame>base_link</robot_base_frame>
     <publish_odometry>true</publish_odometry>

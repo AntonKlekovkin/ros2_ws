@@ -13,23 +13,15 @@ def generate_launch_description():
 
     rsp = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([os.path.join(
-                    get_package_share_directory(package_name),'src', 'launch','rsp.launch.py'
+                    get_package_share_directory(package_name), 'launch','rsp.launch.py'
                 )]), launch_arguments={'use_sim_time': 'true'}.items()
     )
-
-    gazebo = IncludeLaunchDescription(
-                PythonLaunchDescriptionSource([os.path.join(
-                    get_package_share_directory('gazebo_ros'), 'launch', 'gazebo.launch.py')]),
-                    launch_arguments={
-                        'extra_gazebo_args': '--verbose -s libgazebo_ros_init.so -s libgazebo_ros_factory.so',
-        'pause': 'false'}.items()
-             )
 
     spawn_entity = Node(
         package='gazebo_ros', executable='spawn_entity.py',
         arguments=['-topic', 'robot_description',
                     '-entity', 'spherorobot_cpp',
-                    '-z','0.2',
+                    '-z','0.02',
                     '-P','0.0'],
         output='screen',
         parameters=[{
@@ -37,25 +29,8 @@ def generate_launch_description():
         }]
     )
     
-    spawn_table = Node(
-        package='gazebo_ros',
-        executable='spawn_entity.py',
-        arguments=[
-            '-entity', 'rails_system',
-            '-file', os.path.join(get_package_share_directory('spherorobot_cpp'),'src','urdf','vibro_table.urdf'),
-            '-x', '0.5',
-            '-y', '0.0',
-            '-z', '0.1'
-        ],
-        output='screen',
-        parameters=[{
-        'use_sim_time': True
-        }]
-    )
     
     return LaunchDescription([
         rsp,
-        gazebo,
-        spawn_table,
         spawn_entity,
     ])

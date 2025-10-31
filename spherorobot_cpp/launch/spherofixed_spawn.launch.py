@@ -17,7 +17,7 @@ def generate_launch_description():
 
     # Process the URDF file
     pkg_path = os.path.join(get_package_share_directory('spherorobot_cpp'))
-    urdf_file = os.path.join(pkg_path,'src', 'urdf','spherorobot_v5_2.urdf')
+    urdf_file = os.path.join(pkg_path,'urdf','spherorobot_v5_2.urdf')
     robot_description_config = xacro.process_file(urdf_file)
     
     # Create a robot_state_publisher node

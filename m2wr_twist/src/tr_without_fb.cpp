@@ -88,19 +88,15 @@ void CalculatePointsOfTrajectory(int length, float * x, float * y, float * t)
 
 float Range(float val, float min, float max)
 {
-    if(val < min)
-        return min;
-
-    if(val>max)
-        return max;
-
+    if(val < min) return min;
+    if(val > max) return max;
     return val;
 }
 
 float RemapAngle(float val)
 {
-    if(val > PI) { val -= 2*PI; }
-    if(val < -PI) { val += 2*PI; }
+    while(val > PI) { val -= 2*PI; }
+    while(val < -PI) { val += 2*PI; }
 
     return val;
 }
@@ -145,10 +141,8 @@ void CalculateVelocities(const int length, float dt, float thetaStart, float * x
         dy = y[i+1] - y[i];
         dl[i] = sqrt(dx*dx + dy*dy);
         tetta[i] = atan2(y[i+1] - y[i], x[i+1] - x[i]);
-        if(tetta[i] < 0)
-        {
-            tetta[i] += 2*PI;
-        }
+
+        if(tetta[i] < 0) tetta[i] += 2*PI;
 
         if(i==0)
         {
@@ -183,7 +177,6 @@ void TransmitVelocitiesToRobot(int length, float dt, float k, float * v, float *
 {
     geometry_msgs::msg::Vector3 messageLinVel;
     geometry_msgs::msg::Vector3 messageAngVel;
-
 
     for(int i = 0; i < length; i++)
     {
@@ -274,10 +267,8 @@ int main(int argc, char* argv[])
     float coeffSafety = 1;
     k1 = maxLinVelocityReal/maxLinVelocity * coeffSafety;
     k2 = maxAngVelocityReal/maxAngVelocity * coeffSafety;
-
     k = GetMin(2, new float[2] {k1, k2});
-    k = Range(k, 0.1, coeffSafety);
-    
+        
     RCLCPP_INFO(node->get_logger(), "k=%f", k);
 
     // publish calculated linear and angular velocities
@@ -288,7 +279,6 @@ int main(int argc, char* argv[])
 
     StopRobot();
     
-    mySigintHandler(1);
-    return 0;
-    
+    rclcpp::shutdown();
+    return 0;    
 }

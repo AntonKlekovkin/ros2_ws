@@ -13,7 +13,7 @@ def generate_launch_description():
 
     rsp = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([os.path.join(
-                    get_package_share_directory(package_name),'src', 'launch','rsp.launch.py'
+                    get_package_share_directory(package_name),'launch','rsp.launch.py'
                 )]), launch_arguments={'use_sim_time': 'true'}.items()
     )
 
@@ -21,16 +21,30 @@ def generate_launch_description():
         package='gazebo_ros', executable='spawn_entity.py',
         arguments=['-topic', 'robot_description',
                     '-entity', 'spherorobot_cpp',
-                    '-z','0.2',
+                    '-z','0.11',
                     '-P','0.0'],
         output='screen',
-        parameters=[{
-        'use_sim_time': True  
-        }]
+        parameters=[{'use_sim_time': True}]
     )
     
+    spawn_table = Node(
+        package='gazebo_ros',
+        executable='spawn_entity.py',
+        arguments=[
+            '-entity', 'moving_platform',
+            '-file', os.path.join(get_package_share_directory('spherorobot_cpp'),'urdf','vibro_table.urdf'),
+            '-x', '0.5',
+            '-y', '0.0',
+            '-z', '0.001'
+        ],
+        output='screen',
+        parameters=[{
+        'use_sim_time': True
+        }]
+    )
     
     return LaunchDescription([
         rsp,
         spawn_entity,
+        spawn_table,
     ])

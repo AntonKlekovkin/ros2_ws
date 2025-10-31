@@ -71,7 +71,7 @@
         xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <mesh filename="$(find spherorobot_cpp)/src/meshes/base_link.STL" />        
+        <mesh filename="$(find spherorobot_cpp)/meshes/base_link.STL" />        
       </geometry>
       <material
         name="red">
@@ -84,7 +84,7 @@
         xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <mesh filename="$(find spherorobot_cpp)/src/meshes/base_link.STL" />
+        <mesh filename="$(find spherorobot_cpp)/meshes/base_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -113,7 +113,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="$(find spherorobot_cpp)/src/meshes/shaft_link.STL" />
+          filename="$(find spherorobot_cpp)/meshes/shaft_link.STL" />
       </geometry>
       <material
         name="black">
@@ -127,7 +127,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="$(find spherorobot_cpp)/src/meshes/shaft_link.STL" />
+          filename="$(find spherorobot_cpp)/meshes/shaft_link.STL" />
       </geometry>
     </collision>
   </link>
@@ -170,7 +170,7 @@
         xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <!--mesh filename="$(find spherorobot_cpp)/src/meshes/sphere_link.STL" /-->
+        <!--mesh filename="$(find spherorobot_cpp)/meshes/sphere_link.STL" /-->
         <box size="0.12 0.12 0.12"/>
       </geometry>
       <material name="glass">
@@ -182,7 +182,7 @@
         xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <!-- mesh filename="$(find spherorobot_cpp)/src/meshes/sphere_link.STL" /-->
+        <!-- mesh filename="$(find spherorobot_cpp)/meshes/sphere_link.STL" /-->
         <!--sphere radius="0.06"/-->
         <box size="0.12 0.12 0.12"/>
       </geometry>

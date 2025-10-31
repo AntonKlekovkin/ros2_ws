@@ -13,12 +13,11 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(gazebo_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
-install(
-  DIRECTORY src
-  DESTINATION share/${PROJECT_NAME})
+# install( DIRECTORY src DESTINATION share/${PROJECT_NAME})
 
-add_library(pendulum_drive_plugin SHARED src/plugins/pendulum_drive_plugin.cpp)
+add_library(pendulum_drive_plugin SHARED plugins/pendulum_drive_plugin.cpp)
 
 target_link_libraries(pendulum_drive_plugin
   ${gazebo_LIBRARIES}
@@ -57,3 +56,13 @@ if(BUILD_TESTING)
 endif()
 
 ament_package()
+
+install(DIRECTORY launch urdf config meshes control plugins worlds DESTINATION share/${PROJECT_NAME})
+
+add_executable(platform_control control/platform_control.cpp)
+ament_target_dependencies(platform_control rclcpp geometry_msgs)
+install(TARGETS platform_control DESTINATION lib/${PROJECT_NAME})
+
+add_executable(sphero_control control/sphero_control.cpp)
+ament_target_dependencies(sphero_control rclcpp std_msgs sensor_msgs)
+install(TARGETS sphero_control DESTINATION lib/${PROJECT_NAME})

@@ -9,20 +9,17 @@
                 <right_joint>right_wheel_joint</right_joint> 
                 <wheel_separation>0.35</wheel_separation>
                 <wheel_diameter>0.1</wheel_diameter>
-
-            <!-- Connector inf -->  
-                <element2_link_joint>element2_link_joint</element2_link_joint>  
-               
+            
             <!-- limits -->
                 <max_wheel_torque>200</max_wheel_torque>
                 <max_acceleration>10.0</max_acceleration>
 
             <!-- Output -->
+                <odometry_topic>odom</odometry_topic>
                 <odometry_frame>odom</odometry_frame>
                 <robot_base_frame>base_footprint</robot_base_frame>
-                <robot_base_frame_2>base_link_2</robot_base_frame_2>
-
-                <publish_rate>50</publish_rate>
+                
+                <update_rate>50</update_rate>
                 <publish_odom>true</publish_odom>
                 <publish_odom_tf>true</publish_odom_tf>
                 <publish_wheel_tf>true</publish_wheel_tf>

@@ -55,7 +55,7 @@ namespace gazebo
                 }
                 motor_joint_ = model_->GetJoint("shaft_joint");
                 pendulum_link_ = model_->GetLink("base_link");
-                sphere_link_ = model_->GetLink("shaft_link");
+                //sphere_link_ = model_->GetLink("sphere_link");
 
                 // if (!motor_joint_ || !sphere_joint_ || !pendulum_link_ || !sphere_link_) 
                 // {
@@ -80,17 +80,18 @@ namespace gazebo
                 double delta_angle = shaft_angle-angle;
 
                 ignition::math::Pose3d pendulum_link_pose;
-                ignition::math::Pose3d sphere_link_pose;
+                //ignition::math::Pose3d sphere_link_pose;
                 double world_pendulum_angle = 0.0;
                 double world_sphere_angle = 0.0;
 
                 pendulum_link_pose = pendulum_link_->WorldCoGPose();
-                double x = pendulum_link_pose.Pos().X();
-                double y = pendulum_link_pose.Pos().Y();
+                double xPendulum = pendulum_link_pose.Pos().X();
+                //double y = pendulum_link_pose.Pos().Y();
                 world_pendulum_angle = pendulum_link_pose.Rot().Pitch();
 
-                sphere_link_pose = sphere_link_->WorldCoGPose();
-                world_sphere_angle = sphere_link_pose.Rot().Pitch();
+                //sphere_link_pose = sphere_link_->WorldCoGPose();
+                //double xSphere = sphere_link_pose.Pos().X();
+                //world_sphere_angle = sphere_link_pose.Rot().Pitch();
             
                 // Публикуем угол в топик
                 auto angle_msg = sensor_msgs::msg::JointState();
@@ -99,9 +100,9 @@ namespace gazebo
                 angle_msg.header.stamp.sec = sim_time.sec;
                 angle_msg.header.stamp.nanosec = sim_time.nsec;
 
-                angle_msg.name = {"pendulum_joint", "sphere_joint"};
-                angle_msg.position = {x, y};
-                angle_msg.velocity = {world_pendulum_angle,world_sphere_angle};
+                angle_msg.name = {"pendulum"};
+                angle_msg.position = {xPendulum};
+                angle_msg.velocity = {world_pendulum_angle};
                 angle_pub_->publish(angle_msg);
                 angle = shaft_angle;
             }
