@@ -1,5 +1,6 @@
 #include <gazebo/common/Plugin.hh>
 #include <ignition/math/Pose3.hh>
+#include <ignition/math/Vector3.hh>
 #include <gazebo_ros/node.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <gazebo/physics/Model.hh>
@@ -22,7 +23,6 @@ namespace gazebo
             rclcpp::Subscription<std_msgs::msg::Float64>::SharedPtr torque_sub_;
             rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr angle_pub_;
             double target_torque_ = 0.0;
-            double angle = -0.075;
             bool initialized_ = false;
 
         public:
@@ -55,17 +55,7 @@ namespace gazebo
                 }
                 motor_joint_ = model_->GetJoint("shaft_joint");
                 pendulum_link_ = model_->GetLink("base_link");
-                //sphere_link_ = model_->GetLink("sphere_link");
-
-                // if (!motor_joint_ || !sphere_joint_ || !pendulum_link_ || !sphere_link_) 
-                // {
-                //     gzerr << "Не удалось получить все необходимые joints/links!" << std::endl;
-                //     if (!motor_joint_) gzerr << " - shaft_joint не найден" << std::endl;
-                //     if (!sphere_joint_) gzerr << " - sphere_joint не найден" << std::endl;
-                //     if (!pendulum_link_) gzerr << " - base_link не найден" << std::endl;
-                //     if (!sphere_link_) gzerr << " - sphere_link не найден" << std::endl;
-                //     return;
-                // }
+                
                 update_connection_ = event::Events::ConnectWorldUpdateBegin(
                     std::bind(&PendulumDrivePlugin::OnUpdate, this));
                 initialized_ = true;
@@ -74,25 +64,24 @@ namespace gazebo
 
             void OnUpdate() 
             {
-                // if (!initialized_) return;
                 motor_joint_->SetForce(0, target_torque_);
-                double shaft_angle = motor_joint_->Position(0);
-                double delta_angle = shaft_angle-angle;
-
-                ignition::math::Pose3d pendulum_link_pose;
-                //ignition::math::Pose3d sphere_link_pose;
+                
                 double world_pendulum_angle = 0.0;
-                double world_sphere_angle = 0.0;
-
-                pendulum_link_pose = pendulum_link_->WorldCoGPose();
+                
+                auto pendulum_link_pose = pendulum_link_->WorldCoGPose();
                 double xPendulum = pendulum_link_pose.Pos().X();
-                //double y = pendulum_link_pose.Pos().Y();
-                world_pendulum_angle = pendulum_link_pose.Rot().Pitch();
+                double yPendulum = pendulum_link_pose.Pos().Y();
 
-                //sphere_link_pose = sphere_link_->WorldCoGPose();
-                //double xSphere = sphere_link_pose.Pos().X();
-                //world_sphere_angle = sphere_link_pose.Rot().Pitch();
-            
+                auto pendulumLinearVel = pendulum_link_->WorldLinearVel();
+
+                double xLinVel = pendulumLinearVel.X();
+                double yLinVel = pendulumLinearVel.Y();
+                
+                auto pendulum_link_angular_vel = pendulum_link_->WorldAngularVel();
+                auto world_pendulum_angular_vel = pendulum_link_angular_vel.Y();
+                
+                world_pendulum_angle = pendulum_link_pose.Rot().Pitch();
+                
                 // Публикуем угол в топик
                 auto angle_msg = sensor_msgs::msg::JointState();
                 const auto sim_time = model_->GetWorld()->SimTime();
@@ -100,11 +89,10 @@ namespace gazebo
                 angle_msg.header.stamp.sec = sim_time.sec;
                 angle_msg.header.stamp.nanosec = sim_time.nsec;
 
-                angle_msg.name = {"pendulum"};
-                angle_msg.position = {xPendulum};
-                angle_msg.velocity = {world_pendulum_angle};
-                angle_pub_->publish(angle_msg);
-                angle = shaft_angle;
+                angle_msg.name = {"pendulumAngle", "pendulumX", "pendulumY"};
+                angle_msg.position = {world_pendulum_angle, xPendulum, yPendulum};
+                angle_msg.velocity = {world_pendulum_angular_vel, xLinVel, yLinVel};
+                angle_pub_->publish(angle_msg);                
             }
     };
     GZ_REGISTER_MODEL_PLUGIN(PendulumDrivePlugin)

@@ -46,14 +46,14 @@
     <joint name="left_rail_joint" type="fixed">
         <parent link="base_link"/>
         <child link="left_rail"/>
-        <origin xyz="0 0.045 0.001" rpy="0 0 0"/> <!-- Позиция относительно центра -->
+        <origin xyz="0 0.04 0.001" rpy="0 0 0"/> <!-- Позиция относительно центра -->
     </joint>
 
     <!-- Соединение правой рельсы с базой -->
     <joint name="right_rail_joint" type="fixed">
         <parent link="base_link"/>
         <child link="right_rail"/>
-        <origin xyz="0 -0.045 0.001" rpy="0 0 0"/> <!-- Параллельно левой рельсе -->
+        <origin xyz="0 -0.04 0.001" rpy="0 0 0"/> <!-- Параллельно левой рельсе -->
     </joint>
     <gazebo>
   <plugin name="move_planar" filename="libgazebo_ros_planar_move.so">

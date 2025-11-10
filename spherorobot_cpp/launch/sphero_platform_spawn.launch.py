@@ -21,7 +21,7 @@ def generate_launch_description():
         package='gazebo_ros', executable='spawn_entity.py',
         arguments=['-topic', 'robot_description',
                     '-entity', 'spherorobot_cpp',
-                    '-z','0.11',
+                    '-z','0.2',
                     '-P','0.0'],
         output='screen',
         parameters=[{'use_sim_time': True}]

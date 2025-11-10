@@ -11,20 +11,20 @@ void signal_handler(int sig)
 {
     std_msgs::msg::Float64 vel;
     publisher->publish(vel);
-    rclcpp::shutdown(); // это обязательно
+    rclcpp::shutdown(); 
 }
 
 void JointStateCallback(const sensor_msgs::msg::JointState::SharedPtr msg)
 {
-    pendulumRealAngle = msg->velocity[0];
+    pendulumRealAngle = msg->position[0];
 }
 
 
 int main(int argc, char **argv)
 {
     double kp = 1.0;
-    double kd = 1.0;
-    double ki = 0.001;
+    double kd = 0.0;
+    double ki = 0.000;
     rclcpp::init(argc, argv);
     auto node = std::make_shared<rclcpp::Node>("platform_control_node");
 
@@ -34,10 +34,10 @@ int main(int argc, char **argv)
     node->declare_parameter<double>("kp", 1.0);
     kp = node->get_parameter("kp").as_double();
 
-    node->declare_parameter<double>("kd", 1.0);
+    node->declare_parameter<double>("kd", 0.0);
     kd = node->get_parameter("kd").as_double();
 
-    node->declare_parameter<double>("ki", 1.0);
+    node->declare_parameter<double>("ki", 0.0);
     kd = node->get_parameter("ki").as_double();
     
     std::signal(SIGINT, signal_handler);

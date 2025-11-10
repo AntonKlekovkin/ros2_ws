@@ -57,12 +57,12 @@ endif()
 
 ament_package()
 
-install(DIRECTORY launch urdf config meshes control plugins worlds DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch urdf meshes src plugins worlds config DESTINATION share/${PROJECT_NAME})
 
-add_executable(platform_control control/platform_control.cpp)
+add_executable(platform_control src/platform_control.cpp)
 ament_target_dependencies(platform_control rclcpp geometry_msgs)
 install(TARGETS platform_control DESTINATION lib/${PROJECT_NAME})
 
-add_executable(sphero_control control/sphero_control.cpp)
+add_executable(sphero_control src/sphero_control.cpp)
 ament_target_dependencies(sphero_control rclcpp std_msgs sensor_msgs)
 install(TARGETS sphero_control DESTINATION lib/${PROJECT_NAME})
