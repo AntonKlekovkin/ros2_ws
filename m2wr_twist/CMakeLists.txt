@@ -44,3 +44,7 @@ install(TARGETS get_odom DESTINATION lib/${PROJECT_NAME})
 add_executable(tr_without_fb src/tr_without_fb.cpp)
 ament_target_dependencies(tr_without_fb rclcpp nav_msgs tf2 tf2_geometry_msgs)
 install(TARGETS tr_without_fb DESTINATION lib/${PROJECT_NAME})
+
+add_executable(dummy_subs src/dummy_subs.cpp)
+ament_target_dependencies(dummy_subs rclcpp geometry_msgs)
+install(TARGETS dummy_subs DESTINATION lib/${PROJECT_NAME})

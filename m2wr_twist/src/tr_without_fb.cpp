@@ -241,7 +241,7 @@ int main(int argc, char* argv[])
     rclcpp::init(argc, argv);
     node = rclcpp::Node::make_shared("tr_without_fb_node");
     // init of subscriber to get real velocities while motion
-    auto subOdom = node->create_subscription<nav_msgs::msg::Odometry>("odom", 100, msgCallbackOdom);
+    auto subOdom = node->create_subscription<nav_msgs::msg::Odometry>("odom", 1, msgCallbackOdom);
     rclcpp::spin_some(node);
 
     // init sigint event, this event occurs when node exit (CTRL+C)
