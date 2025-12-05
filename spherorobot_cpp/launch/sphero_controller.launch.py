@@ -4,6 +4,12 @@ from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
 
 def generate_launch_description():
+
+    ang = DeclareLaunchArgument(
+            name='ang', 
+            default_value='0.0',
+            description='Angle for stabilization'
+        )
        
     kpArg = DeclareLaunchArgument(
             name='kp', 
@@ -29,8 +35,9 @@ def generate_launch_description():
             name='sphero_control_node',
             parameters=[{'kp' : LaunchConfiguration('kp')},
                         {'kd' : LaunchConfiguration('kd')},
-                        {'ki' : LaunchConfiguration('ki')}],
+                        {'ki' : LaunchConfiguration('ki')},
+                        {'ang' : LaunchConfiguration('ang')}],
             output='screen'
         )
     
-    return LaunchDescription([kpArg, kdArg, kiArg, controller])
+    return LaunchDescription([ang, kpArg, kdArg, kiArg, controller])

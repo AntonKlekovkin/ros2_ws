@@ -24,6 +24,62 @@ namespace gazebo
             rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr angle_pub_;
             double target_torque_ = 0.0;
             bool initialized_ = false;
+            double prevAngle_ = 0.0;
+            bool firstCall_ = true;
+            int fullRevolutions_ = 0;
+
+            double getContinuousAngle(double currentAngle) {
+                // currentAngle должен быть в диапазоне [-π, π]
+                
+                if (firstCall_) 
+                {
+                    // Первый вызов - просто инициализируем
+                    prevAngle_ = currentAngle;
+                    firstCall_ = false;
+                    
+                    // Преобразуем в [0, 2π]
+                    double angle0To2Pi = (currentAngle < 0) ? currentAngle + 2*M_PI : currentAngle;
+                                        
+                    return angle0To2Pi; // angle0To2Pi для [0, 2π]
+                }
+                
+                // Вычисляем разницу между текущим и предыдущим углом
+                double diff = currentAngle - prevAngle_;
+                
+                // Корректируем разрыв через границу ±π
+                if (diff > M_PI) 
+                {
+                    // Большой положительный скачок - вероятно, переход через -π
+                    fullRevolutions_--;
+                }
+                else if (diff < -M_PI) 
+                {
+                    // Большой отрицательный скачок - вероятно, переход через +π
+                    fullRevolutions_++;
+                }
+                
+                // Обновляем предыдущий угол
+                prevAngle_ = currentAngle;
+                
+                // Вычисляем непрерывный угол
+                double continuousAngle = currentAngle + 2*M_PI * fullRevolutions_;
+                
+                // Преобразуем в [0, 4π]
+                return continuousAngle;
+            }
+
+            double GetPitch(const ignition::math::v6::Quaterniond& q)
+            {
+                // Получаем матрицу из кватерниона
+                std::array<std::array<double, 3>, 3> R;
+                double w = q.W(), x = q.X(), y = q.Y(), z = q.Z();
+                
+                R[0][0] = 1 - 2*(y*y + z*z);  R[0][1] = 2*(x*y - w*z);  R[0][2] = 2*(x*z + w*y);
+                R[1][0] = 2*(x*y + w*z);      R[1][1] = 1 - 2*(x*x + z*z);  R[1][2] = 2*(y*z - w*x);
+                R[2][0] = 2*(x*z - w*y);      R[2][1] = 2*(y*z + w*x);  R[2][2] = 1 - 2*(x*x + y*y);
+                
+                return getContinuousAngle(atan2(-R[2][0], R[2][2]));
+            }
 
         public:
             void Load(physics::ModelPtr model, sdf::ElementPtr _sdf) override
@@ -64,9 +120,9 @@ namespace gazebo
 
             void OnUpdate() 
             {
-                motor_joint_->SetForce(0, target_torque_);
+                motor_joint_->SetForce(2, -target_torque_);
                 
-                double world_pendulum_angle = 0.0;
+                //double world_pendulum_angle = 0.0;
                 
                 auto pendulum_link_pose = pendulum_link_->WorldCoGPose();
                 double xPendulum = pendulum_link_pose.Pos().X();
@@ -76,11 +132,15 @@ namespace gazebo
 
                 double xLinVel = pendulumLinearVel.X();
                 double yLinVel = pendulumLinearVel.Y();
+
+                double xForce = pendulum_link_->WorldForce().X();
+                double yForce = pendulum_link_->WorldForce().Y();
                 
                 auto pendulum_link_angular_vel = pendulum_link_->WorldAngularVel();
                 auto world_pendulum_angular_vel = pendulum_link_angular_vel.Y();
                 
-                world_pendulum_angle = pendulum_link_pose.Rot().Pitch();
+                //world_pendulum_angle = pendulum_link_pose.Rot().Pitch();
+                auto pitch = GetPitch(pendulum_link_pose.Rot());
                 
                 // Публикуем угол в топик
                 auto angle_msg = sensor_msgs::msg::JointState();
@@ -90,9 +150,17 @@ namespace gazebo
                 angle_msg.header.stamp.nanosec = sim_time.nsec;
 
                 angle_msg.name = {"pendulumAngle", "pendulumX", "pendulumY"};
-                angle_msg.position = {world_pendulum_angle, xPendulum, yPendulum};
+                angle_msg.position = {pitch, xPendulum, yPendulum};
                 angle_msg.velocity = {world_pendulum_angular_vel, xLinVel, yLinVel};
+                angle_msg.effort = {target_torque_, xForce, yForce};
                 angle_pub_->publish(angle_msg);                
+            }
+
+            void Reset() override
+            {
+                std::cout << "Plugin reset by simulation" << std::endl;
+                firstCall_ = true;
+                fullRevolutions_ = 0;
             }
     };
     GZ_REGISTER_MODEL_PLUGIN(PendulumDrivePlugin)

@@ -1,22 +1,27 @@
-import os
-from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, ExecuteProcess
-from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
-from launch.conditions import IfCondition
-from launch.substitutions import LaunchConfiguration
+from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration, Command, PathJoinSubstitution, EnvironmentVariable
+from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
 
-    gazebo = IncludeLaunchDescription(
-                PythonLaunchDescriptionSource([os.path.join(
-                    get_package_share_directory('gazebo_ros'), 'launch', 'gazebo.launch.py')]),
-                    launch_arguments={
-                        'extra_gazebo_args': '--verbose -s libgazebo_ros_init.so -s libgazebo_ros_factory.so',
-        'pause': 'false'}.items()
-             )
-    
+    gazebo_ros_path = PathJoinSubstitution([FindPackageShare("gazebo_ros"), "launch"])
+    world_file_path = PathJoinSubstitution([FindPackageShare("spherorobot_cpp"), "worlds", "myEmpty.world"])
+
     return LaunchDescription([
-        gazebo
+        DeclareLaunchArgument(
+            name='use_sim_time', 
+            default_value='true',
+            description='Use simulation time'
+        ),
+        # Запуск Gazebo с плагинами
+        IncludeLaunchDescription(
+                PythonLaunchDescriptionSource([gazebo_ros_path, '/gazebo.launch.py']),
+                launch_arguments={'world': world_file_path,
+                                  'use_sim_time': LaunchConfiguration('use_sim_time'),
+                                  'verbose': 'true'}.items()
+             ),
+             
     ])

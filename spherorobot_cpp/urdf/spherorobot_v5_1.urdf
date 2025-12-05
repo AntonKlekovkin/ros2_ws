@@ -5,15 +5,15 @@
 <robot name="spherorobot_v5_1">
   <link name="base_link">
     <inertial>
-      <origin xyz="0 0 -0.024717" rpy="0 0 0" />
-      <mass value="0.148"/>
+      <origin xyz="0 0 -0.2656" rpy="0 0 0" />
+      <mass value="0.177"/>
       <inertia
-        ixx="0.00025234"
+        ixx="0.000204135"
         ixy="0"
-        ixz="0"
-        iyy="0.00025234"
+        ixz="0.000001087"
+        iyy="0.000233988"
         iyz="0"
-        izz="0.00033553" />
+        izz="0.000145761" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -41,12 +41,12 @@
       <origin xyz="0 0 0" rpy="0 0 0" />
       <mass value="0.016" />
       <inertia
-        ixx="2.8353E-05"
+        ixx="232E-09"
         ixy="0"
         ixz="0"
-        iyy="8.1075E-07"
+        iyy="15812E-09"
         iyz="0"
-        izz="2.8352E-05" />
+        izz="15812E-09" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -72,23 +72,24 @@
 
   <joint name="shaft_joint" type="continuous">
     <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="base_link" />
-    <child link="shaft_link" />
+    <parent link="shaft_link" />
+    <child link="base_link" />
     <axis xyz="0 1 0" />
-    <dynamics damping="0.1" friction="0.025"/> 
+    <dynamics damping="0.1" friction="0.0"/>
+    <!--dynamics damping="0.1" friction="0.025"/--> 
   </joint>
   
   <link name="sphere_link">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.07" />
+      <mass value="0.072" />
       <inertia
-        ixx="7.5331E-05"
+        ixx="0.000168647"
         ixy="0"
         ixz="0"
-        iyy="7.5331E-05"
+        iyy="0.000168647"
         iyz="0"
-        izz="7.5331E-05" />
+        izz="0.000168647" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -101,24 +102,25 @@
       </material>
     </visual>
     <collision>
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <origin xyz="0 0 0" rpy="${pi/2} 0 0" />
       <geometry>
         <!-- mesh filename="$(find spherorobot_cpp)/meshes/sphere_link.STL" /-->
-        <sphere radius="0.06"/>
+        <!-- <sphere radius="0.06"/> -->
+        <cylinder length="0.52" radius="0.06"/>
       </geometry>
     </collision>    
   </link>
 
   <gazebo reference="sphere_link">
     <material>Gazebo/Glass</material>
-      <mu1>0.1</mu1>  <!-- Низкое трение для стекла -->
-      <mu2>0.1</mu2>
+      <mu1>0.5</mu1>  <!-- Низкое трение для стекла -->
+      <mu2>0.5</mu2>
   </gazebo>
 
   <joint name="sphere_joint" type="fixed">
     <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="shaft_link" />
-    <child link="sphere_link" />
+    <parent link="sphere_link" />
+    <child link="shaft_link" />
     <axis xyz="0 0 0" />
   </joint>
 

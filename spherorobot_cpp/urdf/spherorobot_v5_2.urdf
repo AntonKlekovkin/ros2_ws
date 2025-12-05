@@ -134,6 +134,7 @@
   <gazebo reference="shaft_link">
     <material>Gazebo/Black</material>
   </gazebo>
+
   <joint
     name="shaft_joint"
     type="continuous">
@@ -146,7 +147,7 @@
       link="shaft_link" />
     <axis
       xyz="0 1 0" />
-      <dynamics damping="0.05" friction="0.01"/> 
+      <dynamics damping="0.0" friction="0.0"/> 
   </joint>
   
   <link
@@ -210,6 +211,7 @@
     <axis
       xyz="0 0 0" />
   </joint>
+  
   <gazebo>
     <plugin name="pendulum_drive" filename="libpendulum_drive_plugin.so">
       <ros><namespace>/</namespace></ros>
