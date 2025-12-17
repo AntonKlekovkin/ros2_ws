@@ -29,15 +29,15 @@ int main(int argc, char **argv)
     double ki = 0.000;
     double angleStar = 0.0;
 
-    double maxMotorTorque = 0.5;
+    double maxMotorTorque = 0.8;
 
-    double mBody = 0.086, mPend = 0.148, iBody = 0.00025234, iPend = 7.5331E-05, R=0.06, rho=0.024717, g=9.8;
+    double mPend = 0.2, iPend = 0.01, rho=0.3, g=9.8;
 
     rclcpp::init(argc, argv);
-    auto node = std::make_shared<rclcpp::Node>("platform_control_node");
+    auto node = std::make_shared<rclcpp::Node>("pendulum_control_node");
 
-    publisher = node->create_publisher<std_msgs::msg::Float64>("motor_torque", 10);
-    auto subscriber = node->create_subscription<sensor_msgs::msg::JointState>("joint_states", 1, JointStateCallback);
+    publisher = node->create_publisher<std_msgs::msg::Float64>("pendulum_torque", 10);
+    auto subscriber = node->create_subscription<sensor_msgs::msg::JointState>("pendulum_state", 1, JointStateCallback);
     
     node->declare_parameter<double>("kp", 1.0);
     kp = node->get_parameter("kp").as_double();
@@ -61,7 +61,6 @@ int main(int argc, char **argv)
     double oldTime = node->now().seconds();
     double integralPart = 0.0;
 
-    //double feedforward = (mPend*g * sin(angleStar)*rho*(mBody*R*R + mPend*R*R + iBody + iPend))/(mPend*rho*cos(angleStar)*R + mBody*R*R + mPend*R*R+iBody);
     double feedforward = mPend * g * rho * sin(angleStar);
     
     while(rclcpp::ok())
@@ -73,18 +72,19 @@ int main(int argc, char **argv)
         integralPart += err*dt;
         double feedback = kp * err  + kd * pendulumRealAngVel + ki*integralPart;
 
-        double torque = 0*feedforward - feedback;
+        double torque = feedforward - feedback;
         double clampedTorque = std::clamp(torque, -maxMotorTorque, maxMotorTorque);
         pendulum_torque.data = clampedTorque;
 
         publisher->publish(pendulum_torque);
         RCLCPP_INFO(node->get_logger(), "Feedforward: %f", feedforward);
         RCLCPP_INFO(node->get_logger(), "Torque: %f", torque);
+        RCLCPP_INFO(node->get_logger(), "ClampedTorque: %f", clampedTorque);
         
         oldTime = currentTime;
         errOld = err;
 
-        rclcpp::sleep_for(std::chrono::milliseconds(50));
+        rclcpp::sleep_for(std::chrono::milliseconds(10));
         rclcpp::spin_some(node);        
     }
     

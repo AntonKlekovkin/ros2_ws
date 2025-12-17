@@ -26,8 +26,8 @@ def generate_launch_description():
                 {
                     'use_sim_time': LaunchConfiguration('use_sim_time'),
                     'robot_description': Command(['xacro ', urdf_path]),
-                    'publish_frequency': 50.0,  # Частота публикации (Гц)
-                    'ignore_timestamp': False,  # Игнорировать временные метки
+                    'publish_frequency': 100.0,  # Частота публикации (Гц)
+                    'ignore_timestamp': True,  # Игнорировать временные метки
                     'frame_prefix': ''  # Префикс для фреймов
                 }
             ]
@@ -36,7 +36,10 @@ def generate_launch_description():
             package='joint_state_publisher',
             executable='joint_state_publisher',
             name='joint_state_publisher',
-            #arguments=[Command(['xacro ', urdf_path])]
+            parameters=[{
+            'source_list': ['joint_states_source'],  # откуда брать данные
+            'rate': 100  # частота публикации
+        }]
         ),
         Node(
             package='gazebo_ros',

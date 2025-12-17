@@ -120,7 +120,7 @@ namespace gazebo
 
             void OnUpdate() 
             {
-                motor_joint_->SetForce(2, -target_torque_);
+                motor_joint_->SetForce(0, -target_torque_);
                 
                 //double world_pendulum_angle = 0.0;
                 

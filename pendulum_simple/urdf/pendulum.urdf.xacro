@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="pendulum_simple">
+
+  <!-- <xacro:macro name="inertial_box" params="mass x y z *origin">
+      <inertial>
+          <xacro:insert_block name="origin"/>
+          <mass value="${mass}" />
+          <inertia ixx="${(1/12) * mass * (y*y+z*z)}" ixy="0.0" ixz="0.0"
+                  iyy="${(1/12) * mass * (x*x+z*z)}" iyz="0.0"
+                  izz="${(1/12) * mass * (x*x+y*y)}" />
+      </inertial>
+  </xacro:macro> -->
+
+
+  
+  <link name="base_link"></link>
+
+  <!-- <link name="base_link"></link> -->
+
+  <joint name="base_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="platform_link" />    
+  </joint>
+
+  <link name="platform_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="100.0"/>
+      <inertia
+        ixx="10"
+        ixy="0"
+        ixz="0"
+        iyy="10"
+        iyz="0"
+        izz="1" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.3 1.0"/>
+      </geometry>
+      <material name="red">
+        <color rgba="1 0 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.3 0.3 1.0"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <gazebo reference="platform_link">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <link name="pendulum_link">
+    <!-- <xacro:inertial_box mass="0.2" x="0.1" y="0.1" z="0.8">
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </xacro:inertial_box> -->
+    <inertial>
+      <origin xyz="0 0 -0.3" rpy="0 0 0" />
+      <mass value="0.2"/>
+      <inertia
+        ixx="0.01"
+        ixy="0"
+        ixz="0"
+        iyy="0.01"
+        iyz="0"
+        izz="0.000330" />
+    </inertial>
+    <visual>
+      <origin xyz="0 0 -0.3" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.1 0.8"/>
+      </geometry>
+      <material name="white">
+        <color rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.3" rpy="0 0 0" />
+      <geometry>
+        <box size="0.1 0.1 0.8"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <gazebo reference="pendulum_link">
+    <material>Gazebo/Red</material>
+  </gazebo>
+
+  
+
+  <joint name="pendulum_joint" type="continuous">
+    <origin xyz="0.2 0 0.3" rpy="0 0 0" />
+    <parent link="platform_link" />
+    <child link="pendulum_link" />
+    <axis xyz="1 0 0" />
+    <dynamics damping="0.0" friction="0.0"/>
+    <!-- <initial_position>0.5</initial_position> угол в радианах -->
+  </joint>
+  
+  
+  <gazebo>
+    <plugin name="pendulum_simple_plugin" filename="libpendulum_simple_plugin.so">
+      <ros><namespace>/</namespace></ros>
+    </plugin>
+  </gazebo>
+  
+</robot>
