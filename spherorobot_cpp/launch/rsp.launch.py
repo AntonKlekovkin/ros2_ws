@@ -29,6 +29,15 @@ def generate_launch_description():
         output='screen',
         parameters=[params]
     )
+
+    node_joint_state_publisher = Node(
+        package='joint_state_publisher',
+        executable='joint_state_publisher',
+        parameters=[{
+            'source_list': ['joint_states_source'],  # откуда брать данные
+            'rate': 50  # частота публикации
+        }]
+    )
     
     rviz_config_file = PathJoinSubstitution(
         [pkg_path, "config", "wold.rviz"]
@@ -47,5 +56,6 @@ def generate_launch_description():
             default_value='true',
             description='Use sim time if true'),
         node_robot_state_publisher,
+        node_joint_state_publisher,
         # rviz_node
     ])

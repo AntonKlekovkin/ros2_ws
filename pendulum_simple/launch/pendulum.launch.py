@@ -55,8 +55,8 @@ def generate_launch_description():
         parameters=[{
             'source_list': ['joint_states_source'],  # откуда брать данные
             'rate': 50  # частота публикации
-        }]
-)
+            }]
+        )
     
     node_robot_state_publisher= Node(
             package='robot_state_publisher',

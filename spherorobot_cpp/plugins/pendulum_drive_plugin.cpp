@@ -84,14 +84,14 @@ namespace gazebo
         public:
             void Load(physics::ModelPtr model, sdf::ElementPtr _sdf) override
             {
-                if (!rclcpp::ok()) 
-                {
-                    rclcpp::init(0, nullptr);
-                }
+                // if (!rclcpp::ok()) 
+                // {
+                //     rclcpp::init(0, nullptr);
+                // }
                 
                 node_ = gazebo_ros::Node::Get(_sdf);
 
-                angle_pub_ = node_->create_publisher<sensor_msgs::msg::JointState>("joint_states", 10);
+                angle_pub_ = node_->create_publisher<sensor_msgs::msg::JointState>("sphero_states", 10);
                 
                 torque_sub_ = node_->create_subscription<std_msgs::msg::Float64>(
                     "/motor_torque",
@@ -109,7 +109,7 @@ namespace gazebo
                 {
                     RCLCPP_INFO(node_->get_logger(), " - %s", joint->GetName().c_str());
                 }
-                motor_joint_ = model_->GetJoint("shaft_joint");
+                motor_joint_ = model_->GetJoint("sphere_joint");
                 pendulum_link_ = model_->GetLink("base_link");
                 
                 update_connection_ = event::Events::ConnectWorldUpdateBegin(
@@ -120,7 +120,7 @@ namespace gazebo
 
             void OnUpdate() 
             {
-                motor_joint_->SetForce(0, -target_torque_);
+                motor_joint_->SetForce(1, -target_torque_);
                 
                 //double world_pendulum_angle = 0.0;
                 

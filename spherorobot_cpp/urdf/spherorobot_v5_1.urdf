@@ -6,14 +6,14 @@
   <link name="base_link">
     <inertial>
       <origin xyz="0 0 -0.2656" rpy="0 0 0" />
-      <mass value="0.177"/>
+      <mass value="0.148"/>
       <inertia
-        ixx="0.000204135"
+        ixx="0.00025234"
         ixy="0"
-        ixz="0.000001087"
-        iyy="0.000233988"
+        ixz="0"
+        iyy="0.00025234"
         iyz="0"
-        izz="0.000145761" />
+        izz="0.00033553" />
     </inertial>
     <visual>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -69,16 +69,7 @@
   <gazebo reference="shaft_link">
     <material>Gazebo/Black</material>
   </gazebo>
-
-  <joint name="shaft_joint" type="continuous">
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="shaft_link" />
-    <child link="base_link" />
-    <axis xyz="0 1 0" />
-    <dynamics damping="0.1" friction="0.0"/>
-    <!--dynamics damping="0.1" friction="0.025"/--> 
-  </joint>
-  
+ 
   <link name="sphere_link">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -117,11 +108,20 @@
       <mu2>0.5</mu2>
   </gazebo>
 
-  <joint name="sphere_joint" type="fixed">
+  <joint name="shaft_joint" type="fixed">
     <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="sphere_link" />
+    <parent link="base_link" />
     <child link="shaft_link" />
-    <axis xyz="0 0 0" />
+    <axis xyz="0 1 0" />    
+  </joint>
+
+  <joint name="sphere_joint" type="continuous">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="shaft_link" />
+    <child link="sphere_link" />
+    <axis xyz="0 1 0" />
+    <dynamics damping="0.1" friction="0.025"/> 
+    <!--dynamics damping="0.1" friction="0.025"/--> 
   </joint>
 
   <gazebo>
