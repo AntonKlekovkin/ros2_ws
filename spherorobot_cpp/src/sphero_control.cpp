@@ -31,7 +31,7 @@ int main(int argc, char **argv)
 
     double maxMotorTorque = 0.5;
 
-    double mBody = 0.086, mPend = 0.148, iBody = 0.00025234, iPend = 7.5331E-05, R=0.06, rho=0.3, g=9.8;
+    double mBody = 0.086, mPend = 0.148, iBody = 0.00025234, iPend = 7.5331E-05, R=0.06, rho=0.2656, g=9.8;
 
     rclcpp::init(argc, argv);
     auto node = std::make_shared<rclcpp::Node>("platform_control_node");
@@ -61,8 +61,8 @@ int main(int argc, char **argv)
     double oldTime = node->now().seconds();
     double integralPart = 0.0;
 
-    double feedforward = (mPend*g * sin(angleStar)*rho*(mBody*R*R + mPend*R*R + iBody + iPend))/(mPend*rho*cos(angleStar)*R + mBody*R*R + mPend*R*R+iBody);
-    //double feedforward = mPend * g * rho * sin(angleStar);
+    //double feedforward = (mPend*g * sin(angleStar)*rho*(mBody*R*R + mPend*R*R + iBody + iPend))/(mPend*rho*cos(angleStar)*R + mBody*R*R + mPend*R*R+iBody);
+    double feedforward = mPend * g * rho * sin(angleStar);
     
     while(rclcpp::ok())
     {

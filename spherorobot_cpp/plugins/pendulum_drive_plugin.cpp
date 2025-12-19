@@ -109,13 +109,28 @@ namespace gazebo
                 {
                     RCLCPP_INFO(node_->get_logger(), " - %s", joint->GetName().c_str());
                 }
-                motor_joint_ = model_->GetJoint("sphere_joint");
-                pendulum_link_ = model_->GetLink("base_link");
+                motor_joint_ = model_->GetJoint("pendulum_joint");
+                pendulum_link_ = model_->GetLink("pendulum_link");
                 
                 update_connection_ = event::Events::ConnectWorldUpdateBegin(
                     std::bind(&PendulumDrivePlugin::OnUpdate, this));
                 initialized_ = true;
                 gzmsg << "PendulumDrivePlugin успешно загружен!" << std::endl;
+
+                // double initial_angle = 3.1415926;
+                // // Сохраняем текущую pose модели как базовую
+                // ignition::math::Pose3d modelPose = model_->WorldPose();
+
+                // // Вычисляем новую pose link'а с учётом поворота
+                // // Пример: поворот вокруг оси X на initial_angle
+                // ignition::math::Pose3d linkRelPose = pendulum_link_->WorldPose();
+                // ignition::math::Quaterniond rotOffset(initial_angle, 0, 0); // pitch
+                // ignition::math::Pose3d newRelPose(
+                //     linkRelPose.Pos(),
+                //     linkRelPose.Rot() * rotOffset
+                // );
+
+                // pendulum_link_->SetWorldPose(modelPose + newRelPose);
             }
 
             void OnUpdate() 
