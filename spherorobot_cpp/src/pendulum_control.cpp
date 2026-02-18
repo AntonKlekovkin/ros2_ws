@@ -34,9 +34,9 @@ int main(int argc, char **argv)
     double mBody = 0.086, mPend = 0.148, iBody = 0.00025234, iPend = 7.5331E-05, R=0.06, rho=0.2656, g=9.8;
 
     rclcpp::init(argc, argv);
-    auto node = std::make_shared<rclcpp::Node>("platform_control_node");
+    auto node = std::make_shared<rclcpp::Node>("pendulum_control_node");
 
-    publisher = node->create_publisher<std_msgs::msg::Float64>("motor_torque", 10);
+    publisher = node->create_publisher<std_msgs::msg::Float64>("pendulum_torque", 10);
     auto subscriber = node->create_subscription<sensor_msgs::msg::JointState>("sphero_states", 1, JointStateCallback);
     
     node->declare_parameter<double>("kp", 1.0);
@@ -73,14 +73,15 @@ int main(int argc, char **argv)
         integralPart += err*dt;
         double feedback = kp * err  + kd * pendulumRealAngVel + ki*integralPart;
 
-        double torque = 0*feedforward - feedback;
+        double torque = 0*feedforward + feedback;
         double clampedTorque = std::clamp(torque, -maxMotorTorque, maxMotorTorque);
         pendulum_torque.data = clampedTorque;
 
         publisher->publish(pendulum_torque);
         RCLCPP_INFO(node->get_logger(), "Feedforward: %f", feedforward);
         RCLCPP_INFO(node->get_logger(), "Torque: %f", torque);
-        
+        RCLCPP_INFO(node->get_logger(), "ClampedTorque: %f", clampedTorque);
+
         oldTime = currentTime;
         errOld = err;
 

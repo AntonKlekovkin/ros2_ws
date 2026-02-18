@@ -5,12 +5,12 @@ from launch.substitutions import LaunchConfiguration
 
 def generate_launch_description():
 
-    ang = DeclareLaunchArgument(
-            name='ang', 
+    vel = DeclareLaunchArgument(
+            name='vel', 
             default_value='0.0',
-            description='Angle for stabilization'
+            description='Target velocity for rotor'
         )
-       
+    
     kpArg = DeclareLaunchArgument(
             name='kp', 
             default_value='1.0',
@@ -28,16 +28,16 @@ def generate_launch_description():
             default_value='0.001',
             description='Kd'
         )
-    
-    controller = Node(
+
+    myNode = Node(
             package='spherorobot_cpp',
-            executable='sphero_control',
-            name='sphero_control_node',
+            executable='rotor_control',
+            name='rotor_control_node',
             parameters=[{'kp' : LaunchConfiguration('kp')},
                         {'kd' : LaunchConfiguration('kd')},
                         {'ki' : LaunchConfiguration('ki')},
-                        {'ang' : LaunchConfiguration('ang')}],
+                        {'vel' : LaunchConfiguration('vel')}],
             output='screen'
         )
     
-    return LaunchDescription([ang, kpArg, kdArg, kiArg, controller])
+    return LaunchDescription([vel, kpArg, kdArg, kiArg, myNode])

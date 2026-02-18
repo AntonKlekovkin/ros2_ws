@@ -17,9 +17,9 @@ find_package(geometry_msgs REQUIRED)
 
 # install( DIRECTORY src DESTINATION share/${PROJECT_NAME})
 
-add_library(pendulum_drive_plugin SHARED plugins/pendulum_drive_plugin.cpp)
+add_library(sphero_plugin SHARED plugins/sphero_plugin.cpp)
 
-target_link_libraries(pendulum_drive_plugin
+target_link_libraries(sphero_plugin
   ${gazebo_LIBRARIES}
   ${gazebo_ros_LIBRARIES}
   ${rclcpp_LIBRARIES}
@@ -28,7 +28,7 @@ target_link_libraries(pendulum_drive_plugin
   ${gazebo_msgs_LIBRARIES}
 )
 
-ament_target_dependencies(pendulum_drive_plugin
+ament_target_dependencies(sphero_plugin
   gazebo
   rclcpp
   gazebo_ros
@@ -37,7 +37,7 @@ ament_target_dependencies(pendulum_drive_plugin
   gazebo_msgs
 )
 
-install(TARGETS pendulum_drive_plugin
+install(TARGETS sphero_plugin
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
@@ -63,6 +63,14 @@ add_executable(platform_control src/platform_control.cpp)
 ament_target_dependencies(platform_control rclcpp geometry_msgs)
 install(TARGETS platform_control DESTINATION lib/${PROJECT_NAME})
 
-add_executable(sphero_control src/sphero_control.cpp)
-ament_target_dependencies(sphero_control rclcpp std_msgs sensor_msgs)
-install(TARGETS sphero_control DESTINATION lib/${PROJECT_NAME})
+add_executable(pendulum_control src/pendulum_control.cpp)
+ament_target_dependencies(pendulum_control rclcpp std_msgs sensor_msgs)
+install(TARGETS pendulum_control DESTINATION lib/${PROJECT_NAME})
+
+add_executable(rotor_vel_control src/rotor_vel_control.cpp)
+ament_target_dependencies(rotor_vel_control rclcpp std_msgs sensor_msgs)
+install(TARGETS rotor_vel_control DESTINATION lib/${PROJECT_NAME})
+
+add_executable(sphero_yaw_control src/sphero_yaw_control.cpp)
+ament_target_dependencies(sphero_yaw_control rclcpp std_msgs sensor_msgs)
+install(TARGETS sphero_yaw_control DESTINATION lib/${PROJECT_NAME})

@@ -5,13 +5,7 @@
 <robot name="spherorobot_rotor_v1">
 
   <link name="base_link"> </link>
-
-  <joint name="base_joint" type="fixed">
-    <origin xyz="0 0 0" rpy="0 0 0" />
-    <parent link="base_link" />
-    <child link="sphere_link" />    
-  </joint>
-
+  
   <link name="sphere_link">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
@@ -35,20 +29,26 @@
     </visual>
     <collision>
     <!-- ${pi/2} -->
-      <origin xyz="0 0 0" rpy="${pi/2} 0 0" /> 
+      <origin xyz="0 0 0" rpy="0 0 0" /> 
       <geometry>
         <!-- <mesh filename="package://spherorobot_rotor_v1/meshes/base_sphere_link.STL" /> -->
-        <cylinder length="0.22" radius="0.06"/>
-        <!-- <sphere radius="0.06"/> -->
+        <!-- <cylinder length="0.22" radius="0.06"/> -->
+        <sphere radius="0.06"/>
       </geometry>
     </collision>
   </link>
 
   <gazebo reference="sphere_link">
     <material>Gazebo/Glass</material>
-      <mu1>0.5</mu1>  <!-- Низкое трение для стекла -->
-      <mu2>0.5</mu2>
+      <mu1>10.5</mu1>  <!-- Низкое трение для стекла -->
+      <mu2>10.5</mu2>
   </gazebo>
+
+  <joint name="base_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <parent link="base_link" />
+    <child link="sphere_link" />    
+  </joint>
 
   <link name="pendulum_link">
     <inertial>
@@ -119,15 +119,17 @@
     </collision>
   </link>
 
-  <joint name="rotor_joint" type="fixed">
+  <joint name="rotor_joint" type="continuous">
     <origin xyz="0 0 -0.045728" rpy="0 0 0" />
     <parent link="pendulum_link" />
     <child link="rotor_link" />
+    <axis xyz="0 0 -1" />
+    <!-- <dynamics damping="0.1" friction="0.025"/>  -->
     <!-- <axis xyz="0 0 -1" /> -->
   </joint>
 
   <gazebo>
-    <plugin name="pendulum_drive" filename="libpendulum_drive_plugin.so">
+    <plugin name="sphero" filename="libsphero_plugin.so">
       <ros><namespace>/</namespace></ros>
     </plugin>
   </gazebo>
