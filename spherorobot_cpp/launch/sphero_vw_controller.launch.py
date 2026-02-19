@@ -15,15 +15,14 @@ def generate_launch_description():
                         PythonLaunchDescriptionSource([spherorobot_package_path,'/sphero_lin_vel_controller.launch.py'])
                                   )
 
-    angVelController = IncludeLaunchDescription(
-                        PythonLaunchDescriptionSource([spherorobot_package_path,'/sphero_ang_vel_controller.launch.py'])
-                                  )
+    angVelController = IncludeLaunchDescription(PythonLaunchDescriptionSource([spherorobot_package_path,'/sphero_ang_vel_controller.launch.py']))
+        
 
     vwController = Node(
-            package='spherorobot_cpp',
-            executable='sphero_vw_control',
-            name='sphero_vw_control_node',            
-            output='screen'
-        )
+                package='spherorobot_cpp',
+                executable='sphero_vw_control',
+                name='sphero_vw_control_node',            
+                output='screen'
+            )
     
     return LaunchDescription([linVelController, angVelController, vwController])

@@ -5,39 +5,39 @@ from launch.substitutions import LaunchConfiguration
 
 def generate_launch_description():
 
-    vel = DeclareLaunchArgument(
-            name='vel', 
+    ang_vel = DeclareLaunchArgument(
+            name='ang_vel', 
             default_value='0.0',
             description='Target yaw rate for sphero. Max = 2.4 rad/s'
         )
     
-    kpArg = DeclareLaunchArgument(
-            name='kp', 
+    ang_vel_kpArg = DeclareLaunchArgument(
+            name='ang_vel_kp', 
             default_value='0.007',
             description='Kp'
         )
     
-    kdArg = DeclareLaunchArgument(
-            name='kd', 
+    ang_vel_kdArg = DeclareLaunchArgument(
+            name='ang_vel_kd', 
             default_value='0.00001',
             description='Kd'
         )
     
-    kiArg = DeclareLaunchArgument(
-            name='ki', 
+    ang_vel_kiArg = DeclareLaunchArgument(
+            name='ang_vel_ki', 
             default_value='0.01',
             description='Kd'
         )
 
-    myNode = Node(
+    ang_vel_myNode = Node(
             package='spherorobot_cpp',
             executable='sphero_ang_vel_control',
             name='sphero_ang_vel_control_node',
-            parameters=[{'kp' : LaunchConfiguration('kp')},
-                        {'kd' : LaunchConfiguration('kd')},
-                        {'ki' : LaunchConfiguration('ki')},
-                        {'vel' : LaunchConfiguration('vel')}],
+            parameters=[{'ang_vel_kp' : LaunchConfiguration('ang_vel_kp')},
+                        {'ang_vel_kd' : LaunchConfiguration('ang_vel_kd')},
+                        {'ang_vel_ki' : LaunchConfiguration('ang_vel_ki')},
+                        {'ang_vel' : LaunchConfiguration('ang_vel')}],
             output='screen'
         )
     
-    return LaunchDescription([vel, kpArg, kdArg, kiArg, myNode])
+    return LaunchDescription([ang_vel, ang_vel_kpArg, ang_vel_kdArg, ang_vel_kiArg, ang_vel_myNode])

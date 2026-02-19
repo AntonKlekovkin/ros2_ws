@@ -43,17 +43,17 @@ int main(int argc, char **argv)
     auto subscriberState = node->create_subscription<sensor_msgs::msg::JointState>("sphero_states", 1, JointStateCallback);
     auto subscriberTargetYaw = node->create_subscription<std_msgs::msg::Float64>("sphero_target_ang_vel", 1, TargetAngVelCallback);
     
-    node->declare_parameter<double>("vel", 0.0);
-    angVelStar = node->get_parameter("vel").as_double();
+    node->declare_parameter<double>("ang_vel", 0.0);
+    angVelStar = node->get_parameter("ang_vel").as_double();
 
-    node->declare_parameter<double>("kp", 0.07);
-    kp = node->get_parameter("kp").as_double();
+    node->declare_parameter<double>("ang_vel_kp", 0.07);
+    kp = node->get_parameter("ang_vel_kp").as_double();
 
-    node->declare_parameter<double>("kd", 0.00001);
-    kd = node->get_parameter("kd").as_double();
+    node->declare_parameter<double>("ang_vel_kd", 0.00001);
+    kd = node->get_parameter("ang_vel_kd").as_double();
 
-    node->declare_parameter<double>("ki", 0.1);
-    ki = node->get_parameter("ki").as_double();
+    node->declare_parameter<double>("ang_vel_ki", 0.1);
+    ki = node->get_parameter("ang_vel_ki").as_double();
         
     RCLCPP_INFO(node->get_logger(), "angVel*: %f", angVelStar);
     RCLCPP_INFO(node->get_logger(), "kp: %f, kd: %f, ki: %f", kp, kd, ki);
