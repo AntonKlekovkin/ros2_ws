@@ -74,3 +74,15 @@ install(TARGETS rotor_vel_control DESTINATION lib/${PROJECT_NAME})
 add_executable(sphero_yaw_control src/sphero_yaw_control.cpp)
 ament_target_dependencies(sphero_yaw_control rclcpp std_msgs sensor_msgs)
 install(TARGETS sphero_yaw_control DESTINATION lib/${PROJECT_NAME})
+
+add_executable(sphero_ang_vel_control src/sphero_ang_vel_control.cpp)
+ament_target_dependencies(sphero_ang_vel_control rclcpp std_msgs sensor_msgs)
+install(TARGETS sphero_ang_vel_control DESTINATION lib/${PROJECT_NAME})
+
+add_executable(sphero_lin_vel_control src/sphero_lin_vel_control.cpp)
+ament_target_dependencies(sphero_lin_vel_control rclcpp std_msgs sensor_msgs)
+install(TARGETS sphero_lin_vel_control DESTINATION lib/${PROJECT_NAME})
+
+add_executable(sphero_vw_control src/sphero_vw_control.cpp)
+ament_target_dependencies(sphero_vw_control rclcpp std_msgs sensor_msgs)
+install(TARGETS sphero_vw_control DESTINATION lib/${PROJECT_NAME})

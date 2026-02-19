@@ -160,6 +160,25 @@ namespace gazebo
                 return pitch_tracker_.getContinuous(atan2(-R[2][0], R[2][2]));                
             }
 
+            ignition::math::Vector3d GetLocalVelocity(physics::LinkPtr link)
+            {
+                if (!link) 
+                {
+                    return ignition::math::Vector3d::Zero;
+                }
+                
+                // Получаем скорость в мировой системе
+                ignition::math::Vector3d world_vel = link->WorldLinearVel();
+                
+                // Получаем ориентацию линка
+                ignition::math::Quaterniond link_rot = link->WorldPose().Rot();
+                
+                // Преобразуем в локальную систему
+                ignition::math::Vector3d local_vel = link_rot.RotateVectorReverse(world_vel);
+                
+                return local_vel;
+            }
+
 
         public:
             void Load(physics::ModelPtr model, sdf::ElementPtr _sdf) override
@@ -226,9 +245,11 @@ namespace gazebo
                 double yPendulum = pendulum_link_pose.Pos().Y();
 
                 auto pendulumLinearVel = pendulum_link_->WorldLinearVel();
-
-                double xLinVel = pendulumLinearVel.X();
-                double yLinVel = pendulumLinearVel.Y();
+                
+                double xLinVel = GetLocalVelocity(pendulum_link_).X();
+                double yLinVel = GetLocalVelocity(pendulum_link_).Y();
+                // double xLinVel = pendulumLinearVel.X();
+                // double yLinVel = pendulumLinearVel.Y();
 
                 double xForce = pendulum_link_->WorldForce().X();
                 double yForce = pendulum_link_->WorldForce().Y();
