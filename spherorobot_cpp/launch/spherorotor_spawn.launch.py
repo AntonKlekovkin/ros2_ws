@@ -24,6 +24,12 @@ def generate_launch_description():
     # Create a robot_state_publisher parameters
     params_rsp = {'robot_description': robot_description_config.toxml(), 'use_sim_time': use_sim_time}
 
+    gazeboWorldArg = DeclareLaunchArgument(
+        name='world', 
+        default_value='myEmpty.world',
+        description='Gazebo world file'
+    )
+    
     pitch = DeclareLaunchArgument(
             name='P', 
             default_value='0.0',
@@ -52,7 +58,7 @@ def generate_launch_description():
     )
 
     gazebo_ros_path = PathJoinSubstitution([FindPackageShare("gazebo_ros"), "launch"])
-    world_file_path = PathJoinSubstitution([FindPackageShare("spherorobot_cpp"), "worlds", "myEmpty.world"])
+    world_file_path = PathJoinSubstitution([FindPackageShare("spherorobot_cpp"), "worlds", LaunchConfiguration('world')])
 
     gazebo = IncludeLaunchDescription(
                 PythonLaunchDescriptionSource([gazebo_ros_path, '/gazebo.launch.py']),
@@ -74,6 +80,7 @@ def generate_launch_description():
     
     
     return LaunchDescription([
+        gazeboWorldArg,
         pitch,
         simTimeArg,
         gazebo,

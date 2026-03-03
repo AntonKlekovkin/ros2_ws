@@ -10,6 +10,7 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -26,3 +27,15 @@ endif()
 ament_package()
 
 install(DIRECTORY launch src DESTINATION share/${PROJECT_NAME})
+
+add_executable(tangentional_escape src/tangentional_escape.cpp)
+ament_target_dependencies(tangentional_escape rclcpp geometry_msgs sensor_msgs)
+install(TARGETS tangentional_escape DESTINATION lib/${PROJECT_NAME})
+
+add_executable(tr_without_fb src/tr_without_fb.cpp)
+ament_target_dependencies(tr_without_fb rclcpp geometry_msgs sensor_msgs)
+install(TARGETS tr_without_fb DESTINATION lib/${PROJECT_NAME})
+
+add_executable(tr_fb_lyapunov src/tr_fb_lyapunov.cpp)
+ament_target_dependencies(tr_fb_lyapunov rclcpp geometry_msgs sensor_msgs)
+install(TARGETS tr_fb_lyapunov DESTINATION lib/${PROJECT_NAME})
