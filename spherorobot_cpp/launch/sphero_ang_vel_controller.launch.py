@@ -11,6 +11,12 @@ def generate_launch_description():
             description='Target yaw rate for sphero. Max = 2.4 rad/s'
         )
     
+    kRotor = DeclareLaunchArgument(
+            name='k_rotor', 
+            default_value='-0.00005',
+            description='Coefficient of rotor angular velocity'
+        )
+    
     ang_vel_kpArg = DeclareLaunchArgument(
             name='ang_vel_kp', 
             default_value='0.007',
@@ -36,8 +42,9 @@ def generate_launch_description():
             parameters=[{'ang_vel_kp' : LaunchConfiguration('ang_vel_kp')},
                         {'ang_vel_kd' : LaunchConfiguration('ang_vel_kd')},
                         {'ang_vel_ki' : LaunchConfiguration('ang_vel_ki')},
-                        {'ang_vel' : LaunchConfiguration('ang_vel')}],
+                        {'ang_vel' : LaunchConfiguration('ang_vel')},
+                        {'k_rotor' : LaunchConfiguration('k_rotor')}],
             output='screen'
         )
     
-    return LaunchDescription([ang_vel, ang_vel_kpArg, ang_vel_kdArg, ang_vel_kiArg, ang_vel_myNode])
+    return LaunchDescription([kRotor, ang_vel, ang_vel_kpArg, ang_vel_kdArg, ang_vel_kiArg, ang_vel_myNode])

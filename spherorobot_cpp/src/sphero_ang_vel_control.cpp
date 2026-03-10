@@ -7,6 +7,7 @@
 rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr publisher;
 
 double spheroRealAngVel = 0.0;
+double rotorRealAngVel = 0.0;
 double angVelStar = 0.0;
 
 void signal_handler(int sig)
@@ -20,6 +21,7 @@ void signal_handler(int sig)
 void JointStateCallback(const sensor_msgs::msg::JointState::SharedPtr msg)
 {
     spheroRealAngVel = msg->velocity[4];
+    rotorRealAngVel = msg->velocity[3];
 }
 
 void TargetAngVelCallback(const std_msgs::msg::Float64::SharedPtr msg)
@@ -33,6 +35,7 @@ int main(int argc, char **argv)
     double kp = 1.0;
     double kd = 0.0;
     double ki = 0.000;
+    double kRotor = 0.0;
     
     double maxRotorTorque = 0.05;
     
@@ -54,9 +57,12 @@ int main(int argc, char **argv)
 
     node->declare_parameter<double>("ang_vel_ki", 0.1);
     ki = node->get_parameter("ang_vel_ki").as_double();
+
+    node->declare_parameter<double>("k_rotor", 0.0);
+    kRotor = node->get_parameter("k_rotor").as_double();
         
     RCLCPP_INFO(node->get_logger(), "angVel*: %f", angVelStar);
-    RCLCPP_INFO(node->get_logger(), "kp: %f, kd: %f, ki: %f", kp, kd, ki);
+    RCLCPP_INFO(node->get_logger(), "kp: %f, kd: %f, ki: %f, kRotor: %f", kp, kd, ki, kRotor);
 
     std::signal(SIGINT, signal_handler);
 
@@ -77,7 +83,7 @@ int main(int argc, char **argv)
         double integral_max = maxRotorTorque / ki * 0.8;
         integralPart += err*dt;
         integralPart = std::clamp(integralPart, -integral_max, integral_max);
-        double feedback = kp * err  + kd * derr + ki * integralPart;
+        double feedback = kp * err  + kd * derr + ki * integralPart + kRotor * rotorRealAngVel;
 
         double torque = -feedback;
         double clampedTorque = std::clamp(torque, -maxRotorTorque, maxRotorTorque);

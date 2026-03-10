@@ -30,24 +30,22 @@
           </geometry>
           <surface>
             <contact>
-              <collide_bitmask>65535</collide_bitmask>
-              <ode/>
+              <collide_bitmask>65535</collide_bitmask>              
             </contact>
             <friction>
               <ode>
-                <mu>10</mu>
-                <mu2>10</mu2>
+                <mu>1</mu>
+                <mu2>1</mu2>
+                <slip1>1</slip1>
+                <slip2>1</slip2>
               </ode>
               <torsional>
-                <!--ode -->
-                  <coefficient>10</coefficient>        <!-- Коэффициент крутильного трения -->
-                  <!-- muPatch>0.5</muPatch --> <!-- Модификатор для патч-контакта (опционально) -->
-                  <!-- slip>10.01</slip -->    <!-- Коэффициент проскальзывания (опционально) -->
-                  <!-- fdir1>0 0 0</fdir1 --> <!-- Направление первого вектора трения (опционально) -->
-                  <surface_radius>0.06</surface_radius>
-                  <!-- Говорим ODE использовать surface_radius, а не patch_radius -->
-                  <use_patch_radius>false</use_patch_radius>
-                <!-- /ode -->
+                <coefficient>1</coefficient>        <!-- Коэффициент крутильного трения -->
+                <surface_radius>0.06</surface_radius>
+                <use_patch_radius>false</use_patch_radius>
+                <ode>
+                  <slip>1</slip>
+                </ode>
               </torsional>
             </friction>
             <bounce/>
