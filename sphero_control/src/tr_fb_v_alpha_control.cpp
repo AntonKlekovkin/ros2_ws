@@ -1,5 +1,6 @@
 #include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/float32.hpp"
+//#include "std_msgs/msg/float32.hpp"
+#include "std_msgs/msg/float64.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "sensor_msgs/msg/joint_state.hpp"
 #include <csignal>
@@ -10,12 +11,14 @@
 
 rclcpp::Node::SharedPtr node;
 
-rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr pub;
+rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr pubLinVel;
+rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr pubAng;
+
 rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr pubTheorTrajectory;
 rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr pubTheorLinVel;
 rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr pubTheorAngVel;
 rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr pubRealLinVel;
-rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr pubRealAngVel;
+rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr pubRealAng;
 
 // geometry_msgs::msg::Twist messageStop;
 // geometry_msgs::msg::Twist messageMotion;
@@ -24,18 +27,20 @@ geometry_msgs::msg::Vector3 points;
 geometry_msgs::msg::Twist vel;
 
 double linVelReal = 0;
-double angVelReal = 0;
+double angReal = 0;
 
 double spheroX = 0.0;
 double spheroY = 0.0;
 double spheroAng_rad = 0.0;
 
 double scaleTrajectory = 0.5;
-double parCoeff = 0.2;
+double parCoeff = 0.045;
 
-double xStar(double t) { return scaleTrajectory * sin(parCoeff * t + M_PI / 2.0); }
-double dxStar(double t) { return parCoeff*scaleTrajectory * cos(parCoeff*t + M_PI / 2); }
-double ddxStar(double t) { return -parCoeff * parCoeff*scaleTrajectory * sin(parCoeff * t + M_PI / 2); }
+double offsetX = 0; //M_PI / 2.0;
+
+double xStar(double t) { return scaleTrajectory * sin(parCoeff * t + offsetX); }
+double dxStar(double t) { return parCoeff*scaleTrajectory * cos(parCoeff*t + offsetX); }
+double ddxStar(double t) { return -parCoeff * parCoeff*scaleTrajectory * sin(parCoeff * t + offsetX); }
 
 double yStar(double t) { return scaleTrajectory * sin(2 * parCoeff*t); }
 double dyStar(double t) { return parCoeff*scaleTrajectory * 2 * cos(2 * parCoeff*t); }
@@ -43,16 +48,21 @@ double ddyStar(double t) { return-parCoeff* parCoeff*scaleTrajectory * 4 * sin(2
 
 void StopRobot()
 {
-    vel.linear.x = 0;
-    vel.angular.z = 0;
-    pub->publish(vel);
+    std_msgs::msg::Float64 linMessage;
+    linMessage.data = 0;
+    pubLinVel->publish(linMessage);
 }
 
 void MoveRobot(float lin, float ang)
 {
-    vel.linear.x = lin;
-    vel.angular.z = ang;
-    pub->publish(vel);
+    std_msgs::msg::Float64 linMessage;
+    std_msgs::msg::Float64 angMessage;
+
+    linMessage.data = lin;
+    angMessage.data = ang;
+
+    pubLinVel->publish(linMessage);
+    pubAng->publish(angMessage);
 }
 
 void Sleep_ms(int ms)
@@ -74,21 +84,21 @@ void JointStateCallback(const sensor_msgs::msg::JointState::SharedPtr msg)
     spheroAng_rad = msg->position[4];
 
     linVelReal = msg->velocity[1];
-    angVelReal = msg->velocity[4];
+    //angVelReal = msg->velocity[4];
 }
 
 
 
 
-void SetupPublishers(rclcpp::Node::SharedPtr node)
-{
-    pub = node->create_publisher<geometry_msgs::msg::Twist>("sphero_cmd_vel", 100);
-    pubTheorTrajectory = node->create_publisher<geometry_msgs::msg::Vector3>("theor_trajectory", 1000);
-    pubTheorLinVel = node->create_publisher<geometry_msgs::msg::Vector3>("theor_lin_vel", 1000);
-    pubTheorAngVel = node->create_publisher<geometry_msgs::msg::Vector3>("theor_ang_vel", 1000);
-    pubRealLinVel = node->create_publisher<geometry_msgs::msg::Vector3>("real_lin_vel", 1000);
-    pubRealAngVel = node->create_publisher<geometry_msgs::msg::Vector3>("real_ang_vel", 1000);
-}
+// void SetupPublishers(rclcpp::Node::SharedPtr node)
+// {
+//     pub = node->create_publisher<geometry_msgs::msg::Twist>("sphero_cmd_vel", 100);
+//     pubTheorTrajectory = node->create_publisher<geometry_msgs::msg::Vector3>("theor_trajectory", 1000);
+//     pubTheorLinVel = node->create_publisher<geometry_msgs::msg::Vector3>("theor_lin_vel", 1000);
+//     pubTheorAngVel = node->create_publisher<geometry_msgs::msg::Vector3>("theor_ang_vel", 1000);
+//     pubRealLinVel = node->create_publisher<geometry_msgs::msg::Vector3>("real_lin_vel", 1000);
+//     pubRealAngVel = node->create_publisher<geometry_msgs::msg::Vector3>("real_ang_vel", 1000);
+// }
 
 int main(int argc, char* argv[])
 {
@@ -102,7 +112,10 @@ int main(int argc, char* argv[])
     // init of subscriber to get real velocities while motion
     //auto subOdom = node->create_subscription<nav_msgs::msg::Odometry>("odom", 1, msgCallbackOdom);
     auto subscriberState = node->create_subscription<sensor_msgs::msg::JointState>("sphero_states", 1, JointStateCallback);
-    pub = node->create_publisher<geometry_msgs::msg::Twist>("sphero_cmd_vel", 100);
+    
+    pubLinVel = node->create_publisher<std_msgs::msg::Float64>("sphero_target_lin_vel", 10);
+    pubAng = node->create_publisher<std_msgs::msg::Float64>("sphero_target_yaw", 10);
+    
     pubTheorTrajectory = node->create_publisher<geometry_msgs::msg::Vector3>("theor_trajectory", 1000);
     rclcpp::spin_some(node);
 
@@ -144,22 +157,16 @@ int main(int argc, char* argv[])
 
         double e1 = cos(alpha) * (xS - x) + sin(alpha) * (yS - y);
         double e2 = -sin(alpha) * (xS - x) + cos(alpha) * (yS - y);
+        // double e1 = xS - x;
+        // double e2 = yS - y;
         double e3 = alphaS - alpha;
 
-        double u1 = -k1 * e1;
-        double u2 = 0.0;
-
-        if (e3 > 0.2)
-        {
-            u2 = -k2 * e3 - k3 * e2 * vS * sin(e3) / e3;
-        }
-        else
-        {
-            u2 = -k2 * e3 - k3 * e2 * vS;
-        }
-
-        double v = vS * cos(e3) - u1;
-        double w = wS - u2;
+        //double u1 = -e1 * cos(alphaS) - e2*sin(alphaS);
+        double u1 = 0.5*e1 ;
+        double u2 = 0.5*atan2(e2,e1);
+        
+        double v = vS + u1;
+        double w = alphaS + u2;
 
         points.x = xS;
         points.y = yS;

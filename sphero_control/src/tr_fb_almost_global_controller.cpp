@@ -12,13 +12,7 @@ rclcpp::Node::SharedPtr node;
 
 rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr pub;
 rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr pubTheorTrajectory;
-rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr pubTheorLinVel;
-rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr pubTheorAngVel;
-rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr pubRealLinVel;
-rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr pubRealAngVel;
 
-// geometry_msgs::msg::Twist messageStop;
-// geometry_msgs::msg::Twist messageMotion;
 geometry_msgs::msg::Vector3 points;
 
 geometry_msgs::msg::Twist vel;
@@ -31,7 +25,7 @@ double spheroY = 0.0;
 double spheroAng_rad = 0.0;
 
 double scaleTrajectory = 0.5;
-double parCoeff = 0.2;
+double parCoeff = 0.2; //0.045
 
 double xStar(double t) { return scaleTrajectory * sin(parCoeff * t + M_PI / 2.0); }
 double dxStar(double t) { return parCoeff*scaleTrajectory * cos(parCoeff*t + M_PI / 2); }
@@ -78,23 +72,11 @@ void JointStateCallback(const sensor_msgs::msg::JointState::SharedPtr msg)
 }
 
 
-
-
-void SetupPublishers(rclcpp::Node::SharedPtr node)
-{
-    pub = node->create_publisher<geometry_msgs::msg::Twist>("sphero_cmd_vel", 100);
-    pubTheorTrajectory = node->create_publisher<geometry_msgs::msg::Vector3>("theor_trajectory", 1000);
-    pubTheorLinVel = node->create_publisher<geometry_msgs::msg::Vector3>("theor_lin_vel", 1000);
-    pubTheorAngVel = node->create_publisher<geometry_msgs::msg::Vector3>("theor_ang_vel", 1000);
-    pubRealLinVel = node->create_publisher<geometry_msgs::msg::Vector3>("real_lin_vel", 1000);
-    pubRealAngVel = node->create_publisher<geometry_msgs::msg::Vector3>("real_ang_vel", 1000);
-}
-
 int main(int argc, char* argv[])
 {
-    const double k1 = 1.0;
-    const double k2 = 1.0;
-    const double k3 = 1.0;
+    const double kp = 5.0;
+    const double kv = 3.0;
+    const double kw = 8.0;
     
     // init ROS
     rclcpp::init(argc, argv);
@@ -114,11 +96,17 @@ int main(int argc, char* argv[])
     // PublishTheoreticalVelocities(numberPoints-1, v, k, pubTheorLinVel);
     // PublishTheoreticalVelocities(numberPoints-1, w, k, pubTheorAngVel);
 
+    double nu1 = 0.1;
+    double nu2 = 0.1;
+    double prevTime_s = 0.0;
+
     double startTime_s = node->now().seconds();
     while(rclcpp::ok())
     {
         double currentTime_s = node->now().seconds();
         double time_s = currentTime_s - startTime_s;
+        double dt = time_s - prevTime_s;
+        prevTime_s = time_s;
 
         if(time_s > 2*2*M_PI/parCoeff)
         {
@@ -140,26 +128,33 @@ int main(int argc, char* argv[])
 
         double vS = sqrt(dxS * dxS + dyS * dyS);
         double wS = (ddyS*dxS - dyS*ddxS) / (dxS*dxS + dyS*dyS);
-        double alphaS =atan2(dyS, dxS);
+        double alphaS = atan2(dyS, dxS);
 
-        double e1 = cos(alpha) * (xS - x) + sin(alpha) * (yS - y);
-        double e2 = -sin(alpha) * (xS - x) + cos(alpha) * (yS - y);
-        double e3 = alphaS - alpha;
+        double ex = x - xS;
+        double ey = y - yS;
 
-        double u1 = -k1 * e1;
-        double u2 = 0.0;
+        double dNu1 = -kv * nu1 - kp*ex + ddxS + kv*dxS;
+        double dNu2 = -kv * nu2 - kp*ey + ddyS + kv*dyS;
 
-        if (e3 > 0.2)
-        {
-            u2 = -k2 * e3 - k3 * e2 * vS * sin(e3) / e3;
-        }
-        else
-        {
-            u2 = -k2 * e3 - k3 * e2 * vS;
-        }
+        nu1 = dNu1*dt + nu1;
+        nu2 = dNu2*dt + nu2;
+        double normNu2 = nu1*nu1 + nu2*nu2;
+        double normNu = sqrt(normNu2);
 
-        double v = vS * cos(e3) - u1;
-        double w = wS - u2;
+        double r1 = cos(alpha);
+        double r2 = sin(alpha);
+
+        double v = r1*nu1 + r2*nu2;
+
+        double rd1 = nu1 / normNu;
+        double rd2 = nu2 / normNu;
+
+        double rTilde1 = rd1*r1 + rd2*r2;
+        double rTilde2 = rd1*(-r2) + rd2*r1;
+
+        double wd = (nu1*(-dNu2) + nu2*dNu1) / normNu2;
+
+        double w = wd + kw * (rTilde2);
 
         points.x = xS;
         points.y = yS;

@@ -39,3 +39,15 @@ install(TARGETS tr_without_fb DESTINATION lib/${PROJECT_NAME})
 add_executable(tr_fb_lyapunov src/tr_fb_lyapunov.cpp)
 ament_target_dependencies(tr_fb_lyapunov rclcpp geometry_msgs sensor_msgs)
 install(TARGETS tr_fb_lyapunov DESTINATION lib/${PROJECT_NAME})
+
+add_executable(tr_fb_v_alpha_control src/tr_fb_v_alpha_control.cpp)
+ament_target_dependencies(tr_fb_v_alpha_control rclcpp geometry_msgs sensor_msgs std_msgs)
+install(TARGETS tr_fb_v_alpha_control DESTINATION lib/${PROJECT_NAME})
+
+add_executable(tr_fb_geometry_controller src/tr_fb_geometry_controller.cpp)
+ament_target_dependencies(tr_fb_geometry_controller rclcpp geometry_msgs sensor_msgs std_msgs)
+install(TARGETS tr_fb_geometry_controller DESTINATION lib/${PROJECT_NAME})
+
+add_executable(tr_fb_almost_global_controller src/tr_fb_almost_global_controller.cpp)
+ament_target_dependencies(tr_fb_almost_global_controller rclcpp geometry_msgs sensor_msgs std_msgs)
+install(TARGETS tr_fb_almost_global_controller DESTINATION lib/${PROJECT_NAME})

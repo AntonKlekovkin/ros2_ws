@@ -12,13 +12,7 @@ rclcpp::Node::SharedPtr node;
 
 rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr pub;
 rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr pubTheorTrajectory;
-rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr pubTheorLinVel;
-rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr pubTheorAngVel;
-rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr pubRealLinVel;
-rclcpp::Publisher<geometry_msgs::msg::Vector3>::SharedPtr pubRealAngVel;
 
-// geometry_msgs::msg::Twist messageStop;
-// geometry_msgs::msg::Twist messageMotion;
 geometry_msgs::msg::Vector3 points;
 
 geometry_msgs::msg::Twist vel;
@@ -31,7 +25,7 @@ double spheroY = 0.0;
 double spheroAng_rad = 0.0;
 
 double scaleTrajectory = 0.5;
-double parCoeff = 0.2;
+double parCoeff = 0.2; //0.045
 
 double xStar(double t) { return scaleTrajectory * sin(parCoeff * t + M_PI / 2.0); }
 double dxStar(double t) { return parCoeff*scaleTrajectory * cos(parCoeff*t + M_PI / 2); }
@@ -78,23 +72,11 @@ void JointStateCallback(const sensor_msgs::msg::JointState::SharedPtr msg)
 }
 
 
-
-
-void SetupPublishers(rclcpp::Node::SharedPtr node)
-{
-    pub = node->create_publisher<geometry_msgs::msg::Twist>("sphero_cmd_vel", 100);
-    pubTheorTrajectory = node->create_publisher<geometry_msgs::msg::Vector3>("theor_trajectory", 1000);
-    pubTheorLinVel = node->create_publisher<geometry_msgs::msg::Vector3>("theor_lin_vel", 1000);
-    pubTheorAngVel = node->create_publisher<geometry_msgs::msg::Vector3>("theor_ang_vel", 1000);
-    pubRealLinVel = node->create_publisher<geometry_msgs::msg::Vector3>("real_lin_vel", 1000);
-    pubRealAngVel = node->create_publisher<geometry_msgs::msg::Vector3>("real_ang_vel", 1000);
-}
-
 int main(int argc, char* argv[])
 {
-    const double k1 = 1.0;
-    const double k2 = 1.0;
-    const double k3 = 1.0;
+    const double kp1 = 2.0;
+    const double kp2 = 2.0;
+    const double kr = 3.0;
     
     // init ROS
     rclcpp::init(argc, argv);
@@ -142,24 +124,34 @@ int main(int argc, char* argv[])
         double wS = (ddyS*dxS - dyS*ddxS) / (dxS*dxS + dyS*dyS);
         double alphaS =atan2(dyS, dxS);
 
-        double e1 = cos(alpha) * (xS - x) + sin(alpha) * (yS - y);
-        double e2 = -sin(alpha) * (xS - x) + cos(alpha) * (yS - y);
-        double e3 = alphaS - alpha;
+        // double e1 = cos(alpha) * (xS - x) + sin(alpha) * (yS - y);
+        // double e2 = -sin(alpha) * (xS - x) + cos(alpha) * (yS - y);
+        // double e3 = alphaS - alpha;
 
-        double u1 = -k1 * e1;
-        double u2 = 0.0;
+        double ex = x - xS;
+        double ey = y - yS;
 
-        if (e3 > 0.2)
-        {
-            u2 = -k2 * e3 - k3 * e2 * vS * sin(e3) / e3;
-        }
-        else
-        {
-            u2 = -k2 * e3 - k3 * e2 * vS;
-        }
+        double u1 = -kp1 * ex + dxS;
+        double u2 = -kp2 * ey + dyS;
 
-        double v = vS * cos(e3) - u1;
-        double w = wS - u2;
+        double Re1_1 = cos(alpha);
+        double Re1_2 = sin(alpha);
+
+        double Re2_1 = -sin(alpha);
+        double Re2_2 = cos(alpha);
+
+        double v = u1*cos(alpha) + u2*sin(alpha);
+
+        double du1 = -kp1 * (Re1_1 * v - dxS) + ddxS;
+        double du2 = -kp2 * (Re1_2 * v - dyS) + ddyS;
+
+        double normU2 = u1*u1 + u2*u2;
+        double normU = sqrt(normU2);
+
+        double r1 = -(u2*du1 - u1*du2) / normU2;
+        double r2 = kr * (u1*Re2_1 + u2*Re2_2) / normU;
+
+        double w = r1 + r2;
 
         points.x = xS;
         points.y = yS;
