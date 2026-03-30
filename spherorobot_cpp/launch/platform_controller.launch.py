@@ -13,7 +13,7 @@ def generate_launch_description():
     
     ampArg = DeclareLaunchArgument(
             name='amp', 
-            default_value='1.0',
+            default_value='0.5',
             description='Amp of platform motion'
         )
     
