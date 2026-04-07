@@ -48,15 +48,15 @@ class SpheroDynamics():
         rho = self.params["rho"]
         g = self.params["g"]
 
-        return np.array([[0],[m*g*rho*np.sin(tht)]])
+        return np.array([[0.0, m*g*rho*np.sin(tht)]]).T
     
     def B(self):
         R = self.params["R"]
-        return np.array([[-1/R],[1]])
+        return np.array([[-1.0/R],[1.0]])
     
     def BPerp(self):
         R = self.params["R"]
-        return np.array([1, 1/R])
+        return np.array([1.0, 1.0/R])
     
     def Servo(self, x):
         L = self.params["L"]
@@ -64,24 +64,29 @@ class SpheroDynamics():
     
     def dServo(self, x):
         L = self.params["L"]
-        return np.array([[1],[-L*np.sin(x)]])
+        return np.array([[1.0],[-L*np.sin(x)]])
     
     def ddServo(self, x):
         L = self.params["L"]
-        return np.array([[0],[-L*np.cos(x)]])
+        return np.array([[0.0],[-L*np.cos(x)]])
     
     def GetAlpha(self, x):
-        return self.BPerp @ self.M(self.Servo(x)[1]) @ self.dServo(x)
+        return (self.BPerp() @ self.M(self.Servo(x)[1][0]) @ self.dServo(x))[0]
 
     def GetBeta(self, x):
-        return self.BPerp @ (self.M(self.Servo(x)[1]) @ self.ddServo(x) 
-                             + self.C(self.Servo(x)[1], self.dServo(x)[1]) @ self.dServo(x))
+        return (self.BPerp() @ (self.M(self.Servo(x)[1][0]) @ self.ddServo(x) 
+                             + self.C(self.Servo(x)[1][0], self.dServo(x)[1][0]) @ self.dServo(x)))[0]
     
     def GetGamma(self, x):
-        return self.BPerp @ self.G(self.Servo(x)[1])
+        return (self.BPerp() @ self.G(self.Servo(x)[1][0]))[0]
     
     def f(self, x, dx, tht, dtht):
-        return -np.invert(self.M(tht)) @ self.C(tht, dtht) @ np.array([[dx],[dtht]]) - np.invert(self.M(tht)) @ self.G(tht)
+        flVect = self.GetFLVect(x)
+        return (flVect @ np.linalg.inv(self.M(tht)) @ (-self.C(tht, dtht) @ np.array([[dx],[dtht]]) - self.G(tht)))[0]
 
-    def g(self, x, dx, tht, dtht):   
-        return -np.invert(self.M(tht)) @ self.B()
+    def g(self, x, dx, tht, dtht): 
+        flVect = self.GetFLVect(x)
+        return (flVect @ np.linalg.inv(self.M(tht)) @ self.B())[0]
+    
+    def GetFLVect(self, x):
+        return np.array([-self.dServo(x)[1][0],1])
