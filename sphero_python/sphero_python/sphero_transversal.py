@@ -9,6 +9,8 @@ from .sphero_dynamics import SpheroDynamics
 import numpy as np
 from scipy.integrate import quad
 from scipy.interpolate import CubicSpline
+import scipy.io as sio
+from scipy.interpolate import make_interp_spline
 
 class TransversalController(Node):
     
@@ -40,36 +42,66 @@ class TransversalController(Node):
 
         self.dynamics = SpheroDynamics()
 
+        self.T_per, self.x_of_tau_func, self.tau_of_x_func = self.GetXStarSplines()
+        self.k1_func, self.k2_func, self.k3_func = self.GetKSplines()
+
+        
+
     def joint_states_callback(self, msg: JointState):
         self.spheroPosX = msg.position[1]
         self.spheroVelX = msg.velocity[1]
         self.pendulumAng = msg.position[0]
         self.pendulumAngVel = msg.velocity[0]
 
-    def ModPeriod(self, x):
-        period = 20.0
+    def GetXStarSplines(self):
+        data_star = sio.loadmat('/home/ros/ros2_ws/src/sphero_python/sphero_python/x_star.mat')
+        X = data_star['S']
+        T = data_star['T']
+        T_per = T[-1]
+
+        x_of_tau = make_interp_spline(T[:,0], X[:,0], k=3) # bc_type='periodic'
+        tau_of_x = make_interp_spline(X[:,0], T[:,0], k=3)
+
+        return T_per, x_of_tau, tau_of_x
+    
+    def GetKSplines(self):
+        data = sio.loadmat('/home/ros/ros2_ws/src/sphero_python/sphero_python/data_K.mat')
+        K_stab = data['K_stab']
+
+        print(K_stab[:,0])
+
+        t_k = np.arange(0.0, self.T_per+0.01, 0.01)
+        k1 = make_interp_spline(t_k, K_stab[:,0], k=3,bc_type='periodic')
+        k2 = make_interp_spline(t_k, K_stab[:,1], k=3,bc_type='periodic')
+        k3 = make_interp_spline(t_k, K_stab[:,2], k=3,bc_type='periodic')
+
+        return k1, k2, k3
+
+
+
+    def ModPeriodX(self, x):
+        period = 2*np.pi
         return x % period
 
     def GetXStarFromTau(self, tau):
-        # return from spline for xStar or inverse?
-        return 0.0
-    
-    def GetdXStarFromTau(self, tau):
-        # return from spline for dxStar or inverse?
+        return self.x_of_tau_func(tau)
+        
+    def GetdXStarFromTau(self, tau):        
         return 0.0
     
     def GetTauFromXStar(self, x):
-        # return tau from spline for xStar or inverse?
-        return 0.0
+        return self.tau_of_x_func(x)
 
     def GetTau(self, x):
-        xMod = self.ModPeriod(x)
+        xMod = self.ModPeriodX(x)
         tau = self.GetTauFromXStar(xMod)
         return tau
 
     def GetK(self, tau):
-        # get elements of matrix K from its splines
-        return 0.0, 1.0, 2.0
+        k1 = self.k1_func(tau)
+        k2 = self.k2_func(tau)
+        k3 = self.k3_func(tau)
+        return k1, k2, k3
     
     def Psi(self, p0, p1):
         step = 0.001
@@ -161,7 +193,7 @@ class TransversalController(Node):
         self.rotor_torque_pub.publish(rotor_torque_msg)
         
         # Логируем отправленные данные для отладки
-        self.get_logger().info(f'Sended: pendulum = {u}, rotor = {0:.6f}')
+        #self.get_logger().info(f'Sended: pendulum = {u}, rotor = {0:.6f}')
 
     
 

@@ -5,10 +5,9 @@ import matplotlib.pyplot as plt
 import os
 from scipy.interpolate import make_interp_spline
 
-print("Текущая директория:", os.getcwd())
-
-# Список файлов в текущей директории
-print("Файлы в директории:", os.listdir('.'))
+def ModPeriodX(x):
+        period = 2*np.pi
+        return x % period
 
 
 # Создание экземпляра
@@ -47,17 +46,58 @@ T_per = T[-1]
 print(X[0])
 print(T_per[0])
 
-x_spl = make_interp_spline(T[:,0], X[:,0], k=3)
+x_of_tau_func = make_interp_spline(T[:,0], X[:,0], k=3) # bc_type='periodic'
+tau_of_x_func = make_interp_spline(X[:,0], T[:,0], k=3)
 
 t_smooth = np.linspace(T.min(), T.max(), 300)
-x_smooth = x_spl(t_smooth)
+x_smooth = x_of_tau_func(t_smooth)
 
-plt.figure(figsize=(10, 6))
-plt.plot(T, X)
-plt.plot(t_smooth, x_smooth, 'r-', label='B-Spline (интерполяция)')
-plt.xlabel('Индекс')
-plt.ylabel('X')
-plt.title('График массива X')
+t_smooth1 = np.linspace(X.min(), X.max(), 300)
+tau_smooth = tau_of_x_func(t_smooth1)
+tau_of_x_func.extrapolate = 'periodic'
+
+print(ModPeriodX(10*np.pi))
+
+print(tau_of_x_func(np.pi))
+
+data = sio.loadmat('/home/ros/ros2_ws/src/sphero_python/sphero_python/data_K.mat')
+K_stab = data['K_stab']
+
+print(K_stab[:,0])
+
+t_k = np.arange(0.0, T_per+0.01, 0.01)
+k1_func = make_interp_spline(t_k, K_stab[:,0], k=3,bc_type='periodic')
+k2_func = make_interp_spline(t_k, K_stab[:,1], k=3,bc_type='periodic')
+k3_func = make_interp_spline(t_k, K_stab[:,2], k=3,bc_type='periodic')
+
+k1_points = k1_func(t_k)
+k2_points = k2_func(t_k)
+k3_points = k3_func(t_k)
+
+plt.figure(figsize=(8, 5))
+plt.plot(t_k, k1_points)
+#plt.plot(t_smooth, x_smooth, 'r-', label='B-Spline (интерполяция)')
+plt.xlabel('t')
+plt.ylabel('k1')
 plt.grid(True)
+
+plt.figure(figsize=(8, 5))
+plt.plot(t_k, k2_points)
+plt.xlabel('t')
+plt.ylabel('k2')
+plt.grid(True)
+
+plt.figure(figsize=(8, 5))
+plt.plot(t_k, k3_points)
+plt.xlabel('t')
+plt.ylabel('k3')
+plt.grid(True)
+
+# plt.figure(figsize=(8, 5))
+# plt.plot(X, T)
+# plt.plot(t_smooth1, tau_smooth, 'r-', label='B-Spline1')
+# plt.xlabel('X')
+# plt.ylabel('tau')
+# plt.grid(True)
 plt.show()
 

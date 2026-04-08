@@ -9,12 +9,12 @@
   <link name="sphere_link">
     <inertial>
       <origin xyz="0 0 0" rpy="0 0 0" />
-      <mass value="0.072" />
+      <mass value="0.08" />
       <inertia
         ixx="0.00017"
         ixy="0"
         ixz="0"
-        iyy="0.0002592"
+        iyy="0.00024"
         iyz="0"
         izz="0.00017" />
     </inertial>
@@ -52,13 +52,13 @@
 
   <link name="pendulum_link">
     <inertial>
-      <origin xyz="0 0 -0.024" rpy="0 0 0" />
+      <origin xyz="0 0 -0.022" rpy="0 0 0" />
       <mass value="0.179" />
       <inertia
         ixx="0.00021"
         ixy="0"
         ixz="0"
-        iyy="0.0000792"
+        iyy="0.00017"
         iyz="0"
         izz="0.00016" />
     </inertial>

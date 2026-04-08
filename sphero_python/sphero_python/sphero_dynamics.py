@@ -82,7 +82,7 @@ class SpheroDynamics():
     
     def f(self, x, dx, tht, dtht):
         flVect = self.GetFLVect(x)
-        return (flVect @ np.linalg.inv(self.M(tht)) @ (-self.C(tht, dtht) @ np.array([[dx],[dtht]]) - self.G(tht)))[0]
+        return (flVect @ np.linalg.inv(self.M(tht)) @ (-self.C(tht, dtht) @ np.array([[dx],[dtht]]) - self.G(tht)))[0] - self.ddServo(x)[1][0] * dx**2
 
     def g(self, x, dx, tht, dtht): 
         flVect = self.GetFLVect(x)
