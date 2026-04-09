@@ -23,9 +23,24 @@ class SpheroDynamics():
         rho = self.params["rho"]
         g = self.params["g"]
 
+        #tht_ = float(tht)
+
         a = M_m + I/(R*R) + i/(R*R)
-        b = -i/R + m*rho*np.cos(tht)
+        b = (-i/R + m*rho*np.cos(tht))
         c = m*rho*rho + i
+
+        # print(f"Тип i: {type(i)}, значение: {i}")
+        # print(f"Тип R: {type(R)}, значение: {R}")
+        # print(f"Тип m: {type(m)}, значение: {m}")
+        # print(f"Тип rho: {type(rho)}, значение: {rho}")
+        # print(f"Тип tht: {type(tht)}, значение: {tht}")
+        # print(f"Тип np.cos(tht): {type(np.cos(tht))}, значение: {np.cos(tht)}")
+
+        # print(f"Тип b: {type(b)}, значение: {b}")
+
+        # print(f"a={a}")
+        # print(f"b={b}")
+        # print(f"c={c}")
         return np.array([[a,b],[b,c]])
     
     def C(self, tht, dtht):
@@ -37,6 +52,9 @@ class SpheroDynamics():
         rho = self.params["rho"]
         g = self.params["g"]
 
+        #tht_ = float(tht)
+        #dtht_ = float(dtht)
+
         return np.array ([[0, -m*rho*np.sin(tht) * dtht],[0,0]])
     
     def G(self, tht):
@@ -47,6 +65,8 @@ class SpheroDynamics():
         R = self.params["R"]
         rho = self.params["rho"]
         g = self.params["g"]
+
+        #tht_ = float(tht)
 
         return np.array([[0.0, m*g*rho*np.sin(tht)]]).T
     
@@ -74,8 +94,8 @@ class SpheroDynamics():
         return (self.BPerp() @ self.M(self.Servo(x)[1][0]) @ self.dServo(x))[0]
 
     def GetBeta(self, x):
-        return (self.BPerp() @ (self.M(self.Servo(x)[1][0]) @ self.ddServo(x) 
-                             + self.C(self.Servo(x)[1][0], self.dServo(x)[1][0]) @ self.dServo(x)))[0]
+        return (self.BPerp() @ self.M(self.Servo(x)[1][0]) @ self.ddServo(x) 
+                             + self.BPerp() @ self.C(self.Servo(x)[1][0], self.dServo(x)[1][0]) @ self.dServo(x))[0]
     
     def GetGamma(self, x):
         return (self.BPerp() @ self.G(self.Servo(x)[1][0]))[0]

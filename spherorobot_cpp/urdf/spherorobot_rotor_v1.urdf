@@ -38,11 +38,11 @@
     </collision>
   </link>
 
-  <gazebo reference="sphere_link">
+  <!-- <gazebo reference="sphere_link">
     <material>Gazebo/Glass</material>
-      <mu1>10.5</mu1>  <!-- Низкое трение для стекла -->
+      <mu1>10.5</mu1>  
       <mu2>10.5</mu2>
-  </gazebo>
+  </gazebo> -->
 
   <joint name="base_joint" type="fixed">
     <origin xyz="0 0 0" rpy="0 0 0" />
@@ -86,7 +86,8 @@
     <parent link="sphere_link" />
     <child link="pendulum_link" />
     <axis xyz="0 1 0" />
-    <dynamics damping="0.1" friction="0.025"/> 
+    <!-- <dynamics damping="0.1" friction="0.025"/>  -->
+    <dynamics damping="0.001" friction="0.0"/> 
   </joint>
 
   <link name="rotor_link">

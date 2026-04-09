@@ -5,7 +5,7 @@ import rclpy
 from rclpy.node import Node  
 from std_msgs.msg import Float64  # Тип сообщения для чисел с плавающей точкой
 from sensor_msgs.msg import JointState  # Тип сообщения для состояния сочленений
-from .sphero_dynamics import SpheroDynamics
+from sphero_python.sphero_dynamics import SpheroDynamics
 import numpy as np
 from scipy.integrate import quad
 from scipy.interpolate import CubicSpline
@@ -22,7 +22,7 @@ class TransversalController(Node):
         self.rotor_torque_pub = self.create_publisher(Float64, 'rotor_torque', 10)
         
         # timer for control loop 
-        timer_period = 0.1  # seconds
+        timer_period = 0.01  # seconds
         self.timer = self.create_timer(timer_period, self.publish_commands)
         self.get_logger().info(f'Таймер запущен, публикация каждые {timer_period} секунд.')
 
@@ -42,27 +42,33 @@ class TransversalController(Node):
 
         self.dynamics = SpheroDynamics()
 
-        self.T_per, self.x_of_tau_func, self.tau_of_x_func = self.GetXStarSplines()
+        self.T_per, self.x_of_tau_func, self.dx_of_tau_func, self.tau_of_x_func = self.GetXStarSplines()
         self.k1_func, self.k2_func, self.k3_func = self.GetKSplines()
+        self.IntegralNum = self.GetIntegralSpline(0,0,0,0,self.GetXStarFromTau(0), self.GetdXStarFromTau(0))
+
+        self.numberOfIter = 0
 
         
 
     def joint_states_callback(self, msg: JointState):
         self.spheroPosX = msg.position[1]
         self.spheroVelX = msg.velocity[1]
-        self.pendulumAng = msg.position[0]
+        self.pendulumAng = np.arctan2 (np.sin(msg.position[0]), np.cos(msg.position[0]))
         self.pendulumAngVel = msg.velocity[0]
 
     def GetXStarSplines(self):
         data_star = sio.loadmat('/home/ros/ros2_ws/src/sphero_python/sphero_python/x_star.mat')
         X = data_star['S']
         T = data_star['T']
+        V = data_star['V']
         T_per = T[-1]
 
         x_of_tau = make_interp_spline(T[:,0], X[:,0], k=3) # bc_type='periodic'
+        dx_of_tau = make_interp_spline(T[:,0], V[:,0], k=3)
         tau_of_x = make_interp_spline(X[:,0], T[:,0], k=3)
 
-        return T_per, x_of_tau, tau_of_x
+
+        return T_per, x_of_tau, dx_of_tau, tau_of_x
     
     def GetKSplines(self):
         data = sio.loadmat('/home/ros/ros2_ws/src/sphero_python/sphero_python/data_K.mat')
@@ -87,7 +93,7 @@ class TransversalController(Node):
         return self.x_of_tau_func(tau)
         
     def GetdXStarFromTau(self, tau):        
-        return 0.0
+        return self.dx_of_tau_func(tau)
     
     def GetTauFromXStar(self, x):
         return self.tau_of_x_func(x)
@@ -105,14 +111,31 @@ class TransversalController(Node):
     
     def Psi(self, p0, p1):
         step = 0.001
+        k=1.0
+
+        if p0 > p1:
+            temp = p0
+            p0 = p1
+            p1 = temp
+            k = -1.0
 
         x = np.arange(p0, p1 + step, step)  # +step чтобы включить p2
-        y = self.dynamics.GetBeta(x) / self.dynamics.GetAlpha(x)
+        y = np.zeros_like(x)
 
+        for i in range(len(x)):
+            beta = self.dynamics.GetBeta(x[i])
+            alpha = self.dynamics.GetAlpha(x[i])
+            print (f"x_i={x[i]}, alpha = {alpha}, beta={beta}, b/a={beta/alpha}")
+            y[i] = beta / alpha
+
+        integ = 0.0
+        for t in x:
+            integ = integ + y[i]*step
+        
         # Вычисляем интеграл методом трапеций
-        integral = np.trapz(y, x)
+        #integral = np.trapz(y, x)
 
-        return np.exp(-2 * integral)
+        return np.exp(-2 * k * integ)
     
     def GetIntegralNum(self, x, dx, tht, dtht, xStarZero, dxStarZero):
         step = 0.001
@@ -121,7 +144,7 @@ class TransversalController(Node):
         range_arr = np.arange(xStarZero, x + step, step)
 
         for t in range_arr:
-            integ = integ + 2 * self.Psi(t, xStarZero) * self.dynamics.GetGamma(t) / self.dynamics.GetAlpha(t)
+            integ = integ + (2 * self.Psi(t, xStarZero) * self.dynamics.GetGamma(t) / self.dynamics.GetAlpha(t))*step
         
         ii = dx**2 - self.Psi(xStarZero, x) * (dxStarZero**2 - integ)
         return ii
@@ -163,10 +186,12 @@ class TransversalController(Node):
         return I_main
 
     def GetTransverseCoords(self, x, dx, tht, dtht):
-        y = tht - self.dynamics.Servo(x)[1][0]
-        dy = dtht - self.dynamics.dServo(x)[1][0] * dx
-        #i = self.GetIntegralSpline(x, dx, tht, dtht, self.GetXStarFromTau(0), self.GetdXStarFromTau(0))(self.ModPeriod(x), dx)
-        i = self.GetIntegralNum(x, dx, tht, dtht, self.GetXStarFromTau(0), self.GetdXStarFromTau(0))
+        x_ = self.ModPeriodX(x)
+        
+        y = tht - self.dynamics.Servo(x_)[1][0]
+        dy = dtht - self.dynamics.dServo(x_)[1][0] * dx
+        #i = self.GetIntegralNum(x_, dx, tht, dtht, self.GetXStarFromTau(0), self.GetdXStarFromTau(0))
+        i = self.IntegralNum(x_, dx)
         return y, dy, i
     
     def publish_commands(self):
@@ -175,15 +200,19 @@ class TransversalController(Node):
         pendulum_torque_msg = Float64()
         rotor_torque_msg = Float64()
 
+        self.get_logger().info(f"count = {self.numberOfIter}")
+
         # calculate torques
         tau = self.GetTau(self.spheroPosX)
         k1, k2, k3 = self.GetK(tau)
 
         y, dy, integral = self.GetTransverseCoords(self.spheroPosX, self.spheroVelX, self.pendulumAng, self.pendulumAngVel)
+        self.get_logger().info(f"y = {y}, dy={dy}, i={integral}")
         v = k1*integral + k2*y + k3*dy
         self.get_logger().info(f"v = {v}")
 
         u = (v - self.dynamics.f(self.spheroPosX, self.spheroVelX, self.pendulumAng, self.pendulumAngVel)) / self.dynamics.g(self.spheroPosX, self.spheroVelX, self.pendulumAng, self.pendulumAngVel)
+        u = u + 0.025
         self.get_logger().info(f"u = {u}")
                 
         # Публикуем сообщения
@@ -191,6 +220,7 @@ class TransversalController(Node):
         rotor_torque_msg.data = 0.0
         self.pendulum_torque_pub.publish(pendulum_torque_msg)
         self.rotor_torque_pub.publish(rotor_torque_msg)
+        self.numberOfIter = self.numberOfIter + 1
         
         # Логируем отправленные данные для отладки
         #self.get_logger().info(f'Sended: pendulum = {u}, rotor = {0:.6f}')
