@@ -49,8 +49,11 @@ print(f"g={dynamics.g(x, dx, tht, dtht)}")
 # x_of_tau_func = make_interp_spline(T[:,0], X[:,0], k=3) # bc_type='periodic'
 # tau_of_x_func = make_interp_spline(X[:,0], T[:,0], k=3)
 
-# t_smooth = np.linspace(T.min(), T.max(), 300)
-# x_smooth = x_of_tau_func(t_smooth)
+t_smooth = np.linspace(0.0, controller.T_per, 100)
+x_smooth = controller.GetXStarFromTau(t_smooth)
+dx_smooth = controller.GetdXStarFromTau(t_smooth)
+tht_smooth = controller.GetThtStarFromTau(t_smooth)
+dtht_smooth = controller.GetdThtStarFromTau(t_smooth)
 
 # t_smooth1 = np.linspace(X.min(), X.max(), 300)
 # tau_smooth = tau_of_x_func(t_smooth1)
@@ -74,18 +77,36 @@ print(f"psi={psi}")
 y, dy, i = controller.GetTransverseCoords(0.0, 0.3, 0.001, 0.0)
 print(f"y={y}, dy={dy}, i={i}")
 
-# plt.figure(figsize=(8, 5))
-# plt.plot(t_k, k1_points)
-# #plt.plot(t_smooth, x_smooth, 'r-', label='B-Spline (интерполяция)')
-# plt.xlabel('t')
-# plt.ylabel('k1')
-# plt.grid(True)
+yArr = np.zeros_like(t_smooth)
+dyArr = np.zeros_like(t_smooth)
+iArr = np.zeros_like(t_smooth)
 
-# plt.figure(figsize=(8, 5))
-# plt.plot(t_k, k2_points)
-# plt.xlabel('t')
-# plt.ylabel('k2')
-# plt.grid(True)
+print(f"x_smooth={controller.GetThtStarFromTau(t_smooth[50])[0]}")
+print(len(t_smooth))
+
+
+for iter in range(len(t_smooth)):
+        yArr[iter], dyArr[iter], iArr[iter] = controller.GetTransverseCoords(x_smooth[iter][0], dx_smooth[iter][0], tht_smooth[iter][0], dtht_smooth[iter][0])
+
+
+plt.figure(figsize=(8, 5))
+#plt.plot(t_k, k1_points)
+plt.plot(t_smooth, yArr, 'r-', label='tht')
+plt.xlabel('t')
+plt.ylabel('y')
+plt.grid(True)
+
+plt.figure(figsize=(8, 5))
+plt.plot(t_smooth, dyArr, 'r-', label='dtht')
+plt.xlabel('t')
+plt.ylabel('dy')
+plt.grid(True)
+
+plt.figure(figsize=(8, 5))
+plt.plot(t_smooth, iArr, 'r-', label='dtht')
+plt.xlabel('t')
+plt.ylabel('iArr')
+plt.grid(True)
 
 # plt.figure(figsize=(8, 5))
 # plt.plot(t_k, k3_points)
@@ -99,5 +120,5 @@ print(f"y={y}, dy={dy}, i={i}")
 # plt.xlabel('X')
 # plt.ylabel('tau')
 # plt.grid(True)
-#plt.show()
+plt.show()
 
