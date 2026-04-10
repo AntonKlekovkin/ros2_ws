@@ -55,6 +55,8 @@ dx_smooth = controller.GetdXStarFromTau(t_smooth)
 tht_smooth = controller.GetThtStarFromTau(t_smooth)
 dtht_smooth = controller.GetdThtStarFromTau(t_smooth)
 
+tau_smooth = controller.GetTauFromXStar(x_smooth)
+
 # t_smooth1 = np.linspace(X.min(), X.max(), 300)
 # tau_smooth = tau_of_x_func(t_smooth1)
 # tau_of_x_func.extrapolate = 'periodic'
@@ -81,8 +83,8 @@ yArr = np.zeros_like(t_smooth)
 dyArr = np.zeros_like(t_smooth)
 iArr = np.zeros_like(t_smooth)
 
-print(f"x_smooth={controller.GetThtStarFromTau(t_smooth[50])[0]}")
-print(len(t_smooth))
+print(f"tau_smooth={controller.GetTauFromXStar(controller.ModPeriodX(-1.0))}")
+
 
 
 for iter in range(len(t_smooth)):
@@ -91,22 +93,17 @@ for iter in range(len(t_smooth)):
 
 plt.figure(figsize=(8, 5))
 #plt.plot(t_k, k1_points)
-plt.plot(t_smooth, yArr, 'r-', label='tht')
+plt.plot(t_smooth, tau_smooth, 'r-', label='tht')
 plt.xlabel('t')
-plt.ylabel('y')
+plt.ylabel('tau')
 plt.grid(True)
 
 plt.figure(figsize=(8, 5))
-plt.plot(t_smooth, dyArr, 'r-', label='dtht')
-plt.xlabel('t')
-plt.ylabel('dy')
+plt.plot(x_smooth, tau_smooth, 'r-', label='dtht')
+plt.xlabel('x')
+plt.ylabel('tau')
 plt.grid(True)
 
-plt.figure(figsize=(8, 5))
-plt.plot(t_smooth, iArr, 'r-', label='dtht')
-plt.xlabel('t')
-plt.ylabel('iArr')
-plt.grid(True)
 
 # plt.figure(figsize=(8, 5))
 # plt.plot(t_k, k3_points)
@@ -120,5 +117,5 @@ plt.grid(True)
 # plt.xlabel('X')
 # plt.ylabel('tau')
 # plt.grid(True)
-plt.show()
+#plt.show()
 

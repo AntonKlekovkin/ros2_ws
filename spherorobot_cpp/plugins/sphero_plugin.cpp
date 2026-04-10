@@ -231,13 +231,13 @@ namespace gazebo
 
             void OnUpdate() 
             {
-                if(flagInitialCondition)
-                {
-                    flagInitialCondition = 0;
-                    ignition::math::Vector3d linearVel(0.0, 0.0, 0.0);
-                    pendulum_link_->SetLinearVel(linearVel);
-                    sphere_link_->SetLinearVel(linearVel);
-                }
+                // if(flagInitialCondition)
+                // {
+                //     flagInitialCondition = 0;
+                //     ignition::math::Vector3d linearVel(0.0, 0.0, 0.0);
+                //     pendulum_link_->SetLinearVel(linearVel);
+                //     sphere_link_->SetLinearVel(linearVel);
+                // }
 
                 pendulum_joint_->SetForce(0, -target_pendulum_torque_);
                 
