@@ -87,7 +87,7 @@
     <child link="pendulum_link" />
     <axis xyz="0 1 0" />
     <!-- <dynamics damping="0.1" friction="0.025"/>  -->
-    <dynamics damping="0.0" friction="0.0"/> 
+    <dynamics damping="0.0" friction="0.025"/> 
   </joint>
 
   <link name="rotor_link">

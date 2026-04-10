@@ -238,11 +238,12 @@ class TransversalController(Node):
         tr_coords_msg.data = [y, dy, integral]
         self.transversal_coords_pub.publish(tr_coords_msg)
 
-        v = k1*integral + k2*y + k3*dy
+        k = 3.0
+        v = k*(k1*integral + k2*y + k3*dy)
         self.get_logger().info(f"v = {v}")
 
         u = (v - self.dynamics.f(self.spheroPosX, self.spheroVelX, self.pendulumAng, self.pendulumAngVel)) / self.dynamics.g(self.spheroPosX, self.spheroVelX, self.pendulumAng, self.pendulumAngVel)
-        #u = u + 0.025
+        u = u - 0.025
         #u = np.clip(u, -u_max, u_max)
         self.get_logger().info(f"u_clamped = {u}")
                 
