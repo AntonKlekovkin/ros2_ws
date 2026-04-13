@@ -209,11 +209,11 @@ class TransversalController(Node):
     def GetTransverseCoords(self, x, dx, tht, dtht):
         x_ = self.ModPeriodX(x)
         
-        # y = tht - self.dynamics.Servo(x_)[1][0]
-        # dy = dtht - self.dynamics.dServo(x_)[1][0] * dx
-        tau = self.GetTauFromXStar(x_)
-        y = self.GetThtStarFromTau(tau) - self.dynamics.Servo(x_)[1][0]
-        dy = self.GetdThtStarFromTau(tau) - self.dynamics.dServo(x_)[1][0] * dx
+        y = tht - self.dynamics.Servo(x_)[1][0]
+        dy = dtht - self.dynamics.dServo(x_)[1][0] * dx
+        # tau = self.GetTauFromXStar(x_)
+        # y = self.GetThtStarFromTau(tau) - self.dynamics.Servo(x_)[1][0]
+        # dy = self.GetdThtStarFromTau(tau) - self.dynamics.dServo(x_)[1][0] * dx
 
         #i = self.GetIntegralNum(x_, dx, tht, dtht, self.GetXStarFromTau(0), self.GetdXStarFromTau(0))
         i = self.IntegralNum(x_, dx)
@@ -238,12 +238,12 @@ class TransversalController(Node):
         tr_coords_msg.data = [y, dy, integral]
         self.transversal_coords_pub.publish(tr_coords_msg)
 
-        k = 3.0
+        k = 1.0
         v = k*(k1*integral + k2*y + k3*dy)
         self.get_logger().info(f"v = {v}")
 
-        u = (v - self.dynamics.f(self.spheroPosX, self.spheroVelX, self.pendulumAng, self.pendulumAngVel)) / self.dynamics.g(self.spheroPosX, self.spheroVelX, self.pendulumAng, self.pendulumAngVel)
-        u = u - 0.025
+        u = -(v - self.dynamics.f(self.spheroPosX, self.spheroVelX, self.pendulumAng, self.pendulumAngVel)) / self.dynamics.g(self.spheroPosX, self.spheroVelX, self.pendulumAng, self.pendulumAngVel)
+        # u = u - 0.025
         #u = np.clip(u, -u_max, u_max)
         self.get_logger().info(f"u_clamped = {u}")
                 
