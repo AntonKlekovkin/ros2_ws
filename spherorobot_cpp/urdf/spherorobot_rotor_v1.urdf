@@ -28,10 +28,8 @@
       </material>
     </visual>
     <collision>
-    <!-- ${pi/2} -->
       <origin xyz="0 0 0" rpy="0 0 0" /> 
       <geometry>
-        <!-- <mesh filename="package://spherorobot_rotor_v1/meshes/base_sphere_link.STL" /> -->
         <!-- <cylinder length="0.22" radius="0.06"/> -->
         <sphere radius="0.06"/>
       </geometry>
@@ -86,8 +84,8 @@
     <parent link="sphere_link" />
     <child link="pendulum_link" />
     <axis xyz="0 1 0" />
-    <!-- <dynamics damping="0.1" friction="0.025"/>  -->
-    <dynamics damping="0.001" friction="0.0"/> 
+    <!-- <dynamics damping="0.01" friction="0.06"/>  -->
+    <dynamics damping="0.001" friction="0.06"/> 
   </joint>
 
   <link name="rotor_link">
@@ -131,6 +129,7 @@
 
   <gazebo>
     <plugin name="sphero" filename="libsphero_plugin.so">
+      <sphere_contact_friction>0.001</sphere_contact_friction>
       <ros><namespace>/</namespace></ros>
     </plugin>
   </gazebo>

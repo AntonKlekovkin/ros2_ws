@@ -242,13 +242,13 @@ class TransversalController(Node):
         v = k*(k1*integral + k2*y + k3*dy)
         self.get_logger().info(f"v = {v}")
 
-        u = -(v - self.dynamics.f(self.spheroPosX, self.spheroVelX, self.pendulumAng, self.pendulumAngVel)) / self.dynamics.g(self.spheroPosX, self.spheroVelX, self.pendulumAng, self.pendulumAngVel)
+        u = (v - self.dynamics.f(self.spheroPosX, self.spheroVelX, self.pendulumAng, self.pendulumAngVel)) / self.dynamics.g(self.spheroPosX, self.spheroVelX, self.pendulumAng, self.pendulumAngVel)
         # u = u - 0.025
         #u = np.clip(u, -u_max, u_max)
         self.get_logger().info(f"u_clamped = {u}")
                 
         # Публикуем сообщения
-        pendulum_torque_msg.data = u
+        pendulum_torque_msg.data = -u
         rotor_torque_msg.data = 0.0
         self.pendulum_torque_pub.publish(pendulum_torque_msg)
         self.rotor_torque_pub.publish(rotor_torque_msg)

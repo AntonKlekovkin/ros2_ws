@@ -147,6 +147,8 @@ namespace gazebo
             AngleTracker yaw_tracker_;
 
             int flagInitialCondition = 1;
+
+            double sphere_contact_friction = 0.0;
             
 
             double GetPitch(const ignition::math::v6::Quaterniond& q)
@@ -223,6 +225,12 @@ namespace gazebo
                 rotor_joint_ = model_->GetJoint("rotor_joint");  
                 rotor_link_ = model_->GetLink("rotor_link");
 
+                // Загружаем коэффициент трения из SDF, если он задан
+                if (_sdf->HasElement("sphere_contact_friction"))
+                    this->sphere_contact_friction = _sdf->Get<double>("sphere_contact_friction");
+
+                RCLCPP_INFO(node_->get_logger(), "sphere_contact_friction=%f", sphere_contact_friction);
+
                 update_connection_ = event::Events::ConnectWorldUpdateBegin(
                     std::bind(&SpheroPlugin::OnUpdate, this));
                 //initialized_ = true;
@@ -250,6 +258,16 @@ namespace gazebo
                         
                 rotor_joint_->SetForce(0, total_torque);
                 
+                // sphere contact friction 
+                ignition::math::Vector3d sphere_angular_vel = sphere_link_->WorldAngularVel();
+                if (sphere_angular_vel.Length() > 0.001) // Минимальный порог для избежания джиттера
+                {
+                    // Момент = -коэффициент_трения * угловая_скорость                    
+                    ignition::math::Vector3d sphere_friction_torque = -(sphere_angular_vel * sphere_contact_friction);
+                    sphere_link_->AddTorque(sphere_friction_torque);
+                }
+
+                // feedbacks
                 auto pendulum_link_pose = pendulum_link_->WorldCoGPose();
                 double xPendulum = pendulum_link_pose.Pos().X();
                 double yPendulum = pendulum_link_pose.Pos().Y();
